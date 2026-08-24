@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-24T03:53:05+00:00",
+  "series": [
+    {
+      "id": "btc-in-gold",
+      "title": "Bitcoin priced in gold",
+      "unit": "ounces of gold",
+      "frequency": "monthly",
+      "scale": "log",
+      "firstDate": "2010-09-01",
+      "lastDate": "2026-07-01",
+      "observationCount": 191,
+      "file": "series/btc-in-gold.json"
+    },
+    {
+      "id": "buffett-indicator",
+      "title": "The Buffett indicator",
+      "unit": "percent of GDP",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1947-10-01",
+      "lastDate": "2026-01-01",
+      "observationCount": 302,
+      "file": "series/buffett-indicator.json"
+    },
+    {
+      "id": "sp500-in-gold",
+      "title": "The S&P 500 priced in gold",
+      "unit": "ounces of gold",
+      "frequency": "monthly",
+      "scale": "linear",
+      "firstDate": "1871-01-01",
+      "lastDate": "2026-07-01",
+      "observationCount": 1867,
+      "file": "series/sp500-in-gold.json"
+    }
+  ]
+}

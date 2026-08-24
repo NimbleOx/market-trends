@@ -1,0 +1,37 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Monday 06:00 UTC. The upstream check runs weekly rather than per-push
+    # because a build reads from the cache by design — see sources/cache.py,
+    # which exists partly to keep CI off other people's public datasets.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: tests (no network)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv venv
+      - run: uv pip install -e ".[dev]"
+      - run: uv run pytest -m "not network" -q
+
+  upstreams:
+    # No upstream data is committed, so a clone can only build if every source
+    # is still retrievable. This proves that against the live feeds. A moved URL
+    # or a feed gone behind a key surfaces here, not on somebody's fresh clone.
+    name: upstreams still retrievable
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv venv
+      - run: uv pip install -e ".[dev]"
+      - run: uv run pytest -m network -q

@@ -1,0 +1,27 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+*.egg-info/
+.DS_Store
+
+# No upstream data is committed. Everything under cache/ is a response this
+# repo knows how to refetch, so it is retrieved rather than vendored: a clone
+# populates it on the first build. Keeping it out means this repo is never the
+# system of record for numbers it did not produce, and never redistributes a
+# source whose terms may not allow it.
+cache/open/*
+cache/restricted/*
+!cache/open/.gitkeep
+!cache/README.md
+
+# The same rule, one step downstream. btc-in-gold derives from a source that
+# states no open licence, so its computed file is rebuilt by a clone rather
+# than shipped in one. dist/index.json still lists it; run `trends build`.
+dist/series/btc-in-gold.json
+
+# `dist/` here holds published JSON, not Python build output — but that is where
+# `uv build` and `hatch build` put a wheel by default. Ignore those so a stray
+# packaging run cannot get committed alongside the series.
+dist/*.whl
+dist/*.tar.gz

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-08-24T03:53:05+00:00",
+  "generatedAt": "2026-08-28T06:41:04+00:00",
   "series": [
     {
       "id": "btc-in-gold",
@@ -23,6 +23,50 @@
       "lastDate": "2026-01-01",
       "observationCount": 302,
       "file": "series/buffett-indicator.json"
+    },
+    {
+      "id": "corporate-profit-share",
+      "title": "Corporate profits as a share of GDP",
+      "unit": "percent of GDP",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1947-01-01",
+      "lastDate": "2026-04-01",
+      "observationCount": 318,
+      "file": "series/corporate-profit-share.json"
+    },
+    {
+      "id": "effective-tariff-rate",
+      "title": "The effective tariff rate on goods imports",
+      "unit": "percent of goods imports",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1992-01-01",
+      "lastDate": "2026-04-01",
+      "observationCount": 138,
+      "file": "series/effective-tariff-rate.json"
+    },
+    {
+      "id": "federal-deficit-share",
+      "title": "The federal deficit as a share of GDP",
+      "unit": "percent of GDP",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1947-01-01",
+      "lastDate": "2026-04-01",
+      "observationCount": 318,
+      "file": "series/federal-deficit-share.json"
+    },
+    {
+      "id": "market-value-per-dollar-of-profit",
+      "title": "Market value per dollar of corporate profit",
+      "unit": "dollars of market value per dollar of profit",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1947-10-01",
+      "lastDate": "2026-01-01",
+      "observationCount": 302,
+      "file": "series/market-value-per-dollar-of-profit.json"
     },
     {
       "id": "sp500-in-gold",

@@ -37,6 +37,31 @@ LICENCES: dict[str, tuple[str, str, bool]] = {
         "Public domain (US federal government work)",
         True,
     ),
+    "CP": (
+        "US Bureau of Economic Analysis, Corporate Profits After Tax",
+        "Public domain (US federal government work)",
+        True,
+    ),
+    "FGRECPT": (
+        "US Bureau of Economic Analysis, Federal Government Current Receipts",
+        "Public domain (US federal government work)",
+        True,
+    ),
+    "FGEXPND": (
+        "US Bureau of Economic Analysis, Federal Government Current Expenditures",
+        "Public domain (US federal government work)",
+        True,
+    ),
+    "B235RC1Q027SBEA": (
+        "US Bureau of Economic Analysis, Federal Government Current Tax Receipts: Customs Duties",
+        "Public domain (US federal government work)",
+        True,
+    ),
+    "BOPGIMP": (
+        "US Census Bureau, Imports of Goods, Balance of Payments Basis",
+        "Public domain (US federal government work)",
+        True,
+    ),
 }
 
 

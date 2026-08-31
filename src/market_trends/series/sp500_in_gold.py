@@ -38,8 +38,8 @@ def build() -> Series:
         frequency="monthly",
         description=(
             "The S&P Composite index divided by the price of one troy ounce of gold. Pricing one "
-            "asset in another removes the currency both are quoted in, so the line moves only when "
-            "equities and gold move relative to each other."
+            "asset in another removes the currency both are quoted in, so the line represents "
+            "movement relative to each other."
         ),
         sources=[equities_source, gold_source],
         observations=observations,

@@ -6,22 +6,22 @@
   "precision": 2,
   "frequency": "monthly",
   "scale": "linear",
-  "description": "The S&P Composite index divided by the price of one troy ounce of gold. Pricing one asset in another removes the currency both are quoted in, so the line moves only when equities and gold move relative to each other.",
+  "description": "The S&P Composite index divided by the price of one troy ounce of gold. Pricing one asset in another removes the currency both are quoted in, so the line represents movement relative to each other.",
   "sources": [
     {
       "name": "Robert J. Shiller, US Stock Markets 1871-Present (via datasets/s-and-p-500)",
       "url": "https://github.com/datasets/s-and-p-500",
       "licence": "ODC-PDDL-1.0",
-      "retrievedAt": "2026-08-28"
+      "retrievedAt": "2026-08-31"
     },
     {
       "name": "Gold price, monthly since 1833 (World Bank and National Mining Association, via datasets/gold-prices)",
       "url": "https://github.com/datasets/gold-prices",
       "licence": "ODC-PDDL-1.0",
-      "retrievedAt": "2026-08-28"
+      "retrievedAt": "2026-08-31"
     }
   ],
-  "generatedAt": "2026-08-28T06:41:04+00:00",
+  "generatedAt": "2026-08-31T16:24:09+00:00",
   "firstDate": "1871-01-01",
   "lastDate": "2026-07-01",
   "observationCount": 1867,

@@ -1,85 +1,209 @@
 # Series
 
-Seven series, each computed from two or three upstreams and published as
-`dist/series/<id>.json`, with a CSV of the observations beside it. The module
-behind each one, under
-`src/market_trends/series/`, opens with a docstring saying why it is built the
-way it is. This page is the short version.
+The registry contains seven series. Each builder joins upstream observations,
+computes a ratio, and returns a `Series` with its source records and display
+metadata. A build writes `series/<id>.json` and `series/<id>.csv` under the
+output directory. See [Output](output.md) for the file format and
+[Sources and licences](sources.md) for reuse terms.
 
-| Id | Measures | Frequency | From | Scale |
+| ID | Measures | Frequency | History starts¹ | Scale |
 | --- | --- | --- | --- | --- |
-| `sp500-in-gold` | The S&P Composite divided by the price of gold | monthly | 1871 | linear |
-| `btc-in-gold` | Bitcoin divided by the price of gold | monthly | 2010 | log |
-| `buffett-indicator` | US corporate equities as a share of GDP | quarterly | 1947 | linear |
-| `corporate-profit-share` | After-tax corporate profits as a share of GDP | quarterly | 1947 | linear |
-| `market-value-per-dollar-of-profit` | Corporate equities divided by after-tax profits | quarterly | 1947 | linear |
-| `federal-deficit-share` | Federal expenditures less receipts, as a share of GDP | quarterly | 1947 | linear |
-| `effective-tariff-rate` | Customs duties as a share of goods imports | quarterly | 1992 | linear |
+| [`sp500-in-gold`](#sp500-in-gold) | S&P Composite index relative to gold | monthly | 1871-01 | linear |
+| [`btc-in-gold`](#btc-in-gold) | Gold equivalent of one bitcoin | monthly | 2010-09 | log |
+| [`buffett-indicator`](#buffett-indicator) | Nonfinancial corporate equity value / GDP | quarterly | 1947 Q4 | linear |
+| [`corporate-profit-share`](#corporate-profit-share) | After-tax corporate profits / GDP | quarterly | 1947 Q1 | linear |
+| [`market-value-per-dollar-of-profit`](#market-value-per-dollar-of-profit) | Nonfinancial corporate equity value / after-tax profits | quarterly | 1947 Q4 | linear |
+| [`federal-deficit-share`](#federal-deficit-share) | Federal current expenditures minus receipts / GDP | quarterly | 1947 Q1 | linear |
+| [`effective-tariff-rate`](#effective-tariff-rate) | Customs duties / goods imports | quarterly | 1992 Q1 | linear |
+
+¹ Start dates reflect the checked-in index. A build uses the dates available in
+its inputs; it does not hardcode these boundaries. Read `firstDate`, `lastDate`,
+and `observationCount` from the generated JSON for the actual coverage.
 
 ## sp500-in-gold
 
-The S&P Composite divided by the price of a troy ounce of gold. Dividing one
-price by another strips out the dollar both are quoted in, so the line moves
-only when equities and gold move relative to each other. Both inputs are
-monthly averages. Gold reaches back to 1833 and Shiller's prices to 1871, so
-the ratio starts in 1871. The 1980 low and the 2000 high are the two readings
-the chart exists to show.
+```text
+value = monthly S&P Composite index level / gold price in USD per troy ounce
+```
+
+The two inputs come from `datasets/s-and-p-500` and `datasets/gold-prices`.
+The ratio shows equities moving relative to gold. It uses the index price
+level; dividends are not reinvested, and it does not represent the return of
+a purchased share or fund.
+
+The equity package uses Shiller's historical series through June 2023 and
+extends it with monthly averages of FRED's daily S&P 500 prices. This repository
+reads the package's `SP500` column directly. See the
+[upstream source description](https://github.com/datasets/s-and-p-500#data)
+and [extension script](https://github.com/datasets/s-and-p-500/blob/main/scripts/update_from_fred.py).
+
+Gold is a monthly average from 1960 onward. For 1833–1959, the upstream
+monthly file repeats each year's annual average in all twelve months. The
+pre-1960 ratio therefore combines monthly equities with annual gold values;
+it does not reveal within-year gold movements. See the
+[gold package's construction notes](https://github.com/datasets/gold-prices#notes-from-the-sources).
+
+Only matching dates with positive prices survive. Values are rounded to four
+decimal places; `precision: 2` requests two decimal places for display.
+The published `unit` is `ounces of gold`, with the index-level interpretation
+above.
+
+Implementation: [src/market_trends/series/sp500_in_gold.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/sp500_in_gold.py).
 
 ## btc-in-gold
 
-Bitcoin divided by the price of gold, both monthly averages, from the first
-month with enough daily prices to average. The ratio spans four orders of
-magnitude, so it is published with `scale: log`. It derives from a source with
-no open licence, which is why its file is git-ignored and rebuilt by a clone
-rather than shipped in one. See [Sources and licences](sources.md).
+```text
+value = monthly bitcoin price in USD / monthly gold price in USD per troy ounce
+```
+
+This measures how many troy ounces of gold have the same quoted value as one
+bitcoin. The source adapter groups blockchain.com timestamps by UTC calendar
+month, discards nonpositive prices, and takes an arithmetic mean of the
+remaining readings. A month needs at least 20 readings to qualify. This is a
+coverage threshold: a month can qualify before it has ended, and the adapter
+does not check for one reading per distinct day.
+
+Bitcoin monthly averages are rounded to four decimal places before division.
+The ratio is rounded to six decimal places and carries `precision: 2` and
+`scale: log`. The extra stored decimals preserve small early values even when
+fixed two-decimal formatting would show `0.00`; consumers may need more digits
+in tooltips. Only months present in both inputs are emitted.
+
+The generated Bitcoin JSON and CSV are git-ignored because the source has no
+open licence recorded. A full build still writes them locally. See
+[Bitcoin data](sources.md#bitcoin-data) before distributing them.
+
+Implementation: [src/market_trends/series/btc_in_gold.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/btc_in_gold.py).
 
 ## buffett-indicator
 
-The market value of US corporate equities as a percentage of GDP. Built from
-the Federal Reserve's Z.1 accounts and BEA GDP rather than a proprietary index,
-so both inputs are public domain. Z.1 counts all equity issued by nonfinancial
-corporate business, listed or not, so the level runs above charts built on a
-total-market index. The shape over time is the same. Quarterly, because GDP is.
+```text
+value = (NCBEILQ027S / 1,000) / GDP × 100
+```
+
+`NCBEILQ027S` is nonfinancial corporate equity value in millions of dollars;
+division by 1,000 converts it to the billions used by `GDP`. The numerator is
+a quarter-end stock, while GDP is a quarterly flow expressed at a seasonally
+adjusted annual rate. The result is a percentage of annualised GDP, not of
+spending during that quarter alone. See the FRED definitions for
+[`NCBEILQ027S`](https://fred.stlouisfed.org/series/NCBEILQ027S) and
+[`GDP`](https://fred.stlouisfed.org/series/GDP).
+
+This construction includes publicly traded and closely held nonfinancial
+corporations. It excludes financial corporations, so its coverage differs
+from a total-market stock index. Neither the level nor the path should be
+assumed identical to another chart labelled “Buffett indicator.” The
+[Federal Reserve's series breakdown](https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL103164105&t=)
+describes the equity components.
+
+Implementation: [src/market_trends/series/buffett_indicator.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/buffett_indicator.py).
 
 ## corporate-profit-share
 
-After-tax corporate profits as a percentage of GDP. One of the two terms the
-Buffett indicator multiplies together: market value over GDP is profits over
-GDP times market value over profits. After tax, because that is the figure a
-valuation multiple is applied to.
+```text
+value = CP / GDP × 100
+```
+
+Both inputs are billions of dollars at seasonally adjusted annual rates, so
+no conversion is needed. `CP` is after-tax corporate profits **without**
+inventory valuation and capital consumption adjustments. Use this exact series
+when reproducing the calculation; other BEA profit measures give different
+results. See the [FRED definition of CP](https://fred.stlouisfed.org/series/CP).
+
+This is the profit component of the decomposition below. Its corporate profit
+coverage is broader than the nonfinancial equity numerator used by the
+Buffett indicator; the identity is algebraic, not a claim that their sectors
+match exactly.
+
+Implementation: [src/market_trends/series/corporate_profit_share.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/corporate_profit_share.py).
 
 ## market-value-per-dollar-of-profit
 
-Corporate equities divided by after-tax profits, which makes it an aggregate
-price-to-earnings ratio. The other term in that product, built from the same
-two sources so the decomposition is exact: dividing this series into the
-Buffett indicator returns the profit share to within rounding.
+```text
+value = (NCBEILQ027S / 1,000) / CP
+```
+
+The result is dollars of nonfinancial corporate equity value per dollar of
+annualised after-tax corporate profit. It is an aggregate valuation ratio,
+not the P/E ratio of an index or a set of companies with matching earnings.
+It can change when equity values change, profits change, or both.
+
+On dates shared by all three series, using the same source observations:
+
+```text
+buffett-indicator ≈ corporate-profit-share × market-value-per-dollar-of-profit
+```
+
+The equality holds before rounding. Both percentage series use percent units,
+so no additional factor of 100 is needed in this expression. Independently
+refreshed inputs can break the comparison; use the same cached responses for
+all three builders.
+
+Implementation: [src/market_trends/series/market_value_per_dollar_of_profit.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/market_value_per_dollar_of_profit.py).
 
 ## federal-deficit-share
 
-Federal current expenditures less current receipts, as a percentage of GDP, on
-the national accounts basis rather than the unified budget. Drawn beside the
-profit share because one sector's deficit is another sector's surplus. These
-are quarterly figures at annual rates, so a single extraordinary quarter reads
-far above the fiscal-year deficit for the same period. A deficit is positive
-here; the few surpluses cross below zero.
+```text
+value = (FGEXPND − FGRECPT) / GDP × 100
+```
+
+All inputs are billions of dollars at seasonally adjusted annual rates. The
+result is positive for a deficit and negative for a surplus. It compares
+federal **current** expenditures and receipts on the National Income and
+Product Accounts basis. It is not the unified federal budget deficit or a
+fiscal-year total. Definitions: [`FGEXPND`](https://fred.stlouisfed.org/series/FGEXPND)
+and [`FGRECPT`](https://fred.stlouisfed.org/series/FGRECPT).
+
+The shared national-accounts basis makes this useful beside the profit share.
+The comparison does not establish that a change in the federal deficit caused
+an equal change in corporate profits. A quarterly annual-rate ratio can also
+differ substantially from the deficit measured across a full fiscal year.
+
+Implementation: [src/market_trends/series/federal_deficit_share.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/federal_deficit_share.py).
 
 ## effective-tariff-rate
 
-Customs duties collected as a percentage of the value of goods imported, by
-quarter. This is the rate importers actually paid, which runs well below the
-rates announced: exemptions, carve-outs, announced rates that never took effect
-and switching to suppliers in untariffed countries all sit between the two.
-Monthly imports are averaged and annualised onto the quarterly numerator's
-footing. A quarter without all three months is dropped rather than
-extrapolated.
+```text
+annualised imports = mean(BOPGIMP for the quarter's 3 months) × 12 / 1,000
+value = B235RC1Q027SBEA / annualised imports × 100
+```
 
-## Conventions all of them share
+[`B235RC1Q027SBEA`](https://fred.stlouisfed.org/series/B235RC1Q027SBEA)
+is customs duties in billions of dollars at a seasonally adjusted annual
+rate. [`BOPGIMP`](https://fred.stlouisfed.org/series/BOPGIMP) is monthly
+goods imports in millions of dollars, seasonally adjusted. The conversion
+puts the denominator on the same annual-rate and dollar-unit basis.
 
-- A series is never resampled finer than its coarsest input. Anything divided
-  by GDP is quarterly, because interpolating GDP up to monthly would invent
-  detail the source does not have.
-- A ratio is computed only on dates both inputs share. A date missing from
-  either side is dropped, not filled in.
-- `precision` and `scale` travel with the data, because the sensible rendering
-  is a property of the series rather than of any one chart.
+The builder groups import rows into calendar quarters and keeps only groups
+with exactly three observations. It assumes the upstream supplies one row per
+month; it does not separately verify three distinct months. A retained quarter
+must also have a duties observation and a positive imports denominator.
+
+This is an aggregate collections-to-imports ratio. Product mix, exemptions,
+timing, and sourcing changes can make it differ from announced tariff rates;
+it is not the rate charged on every shipment.
+
+Implementation: [src/market_trends/series/effective_tariff_rate.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/effective_tariff_rate.py).
+
+## Shared calculation and display conventions
+
+- **Dates identify periods.** Monthly rows use the first day of the month;
+  quarterly rows use January 1, April 1, July 1, or October 1. A period-start
+  label does not imply a first-day measurement: the equity numerator is a
+  quarter-end value.
+- **Joins use exact dates.** After any source aggregation, a builder keeps
+  only dates present in every required input. It drops missing dates and
+  nonpositive denominators rather than filling them. Coverage may have gaps,
+  including early equity data with only annual observations.
+- **Aggregation follows the inputs.** GDP-based ratios remain quarterly;
+  daily Bitcoin readings become monthly averages; monthly imports become
+  quarterly annualised values. Historical gold already contains annual values
+  repeated into monthly rows upstream, as described above.
+- **Storage and display differ.** All ratios except Bitcoin are rounded to
+  four decimal places. `precision` requests display decimals; it does not
+  control calculation rounding. The quarterly series request one display
+  decimal and a linear scale.
+- **Validation has a limited role.** It checks series structure and values,
+  not the economic interpretation, source units, complete periods, or release
+  freshness. See [Output](output.md) for the checks and
+  [Development](development.md) for the tests.

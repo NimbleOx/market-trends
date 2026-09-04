@@ -3,158 +3,161 @@
 [![ci](https://github.com/NimbleOx/market-trends/actions/workflows/ci.yml/badge.svg)](https://github.com/NimbleOx/market-trends/actions/workflows/ci.yml)
 [![docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://nimbleox.github.io/market-trends/)
 
-Computes the long-run financial series published at
-[jameswarrick.com/money/trends/](https://www.jameswarrick.com/money/trends/) and elsewhere on [jameswarrick.com](https://www.jameswarrick.com).
+Build seven historical financial and economic ratios as JSON and CSV. This
+repository contains the calculations and source metadata behind the charts at
+[jameswarrick.com/money/trends/](https://www.jameswarrick.com/money/trends/).
+Use the output in a chart, a dataframe, or another application; chart rendering
+lives in the consuming application.
 
-This repo emits **data**, not charts. Any charts would be constructed selerately from this data.
+## Quick start
 
-This repo is written heavily by AI, although I have made efforts to validate that the data being produced is valid.
+You need **Python 3.11 or later**, Git, and
+[uv](https://docs.astral.sh/uv/getting-started/installation/). The commands below
+use Bash or Zsh on macOS, Linux, or WSL. For Windows PowerShell or installation
+with standard `pip`, see [Development](docs/development.md#set-up-a-checkout).
 
 ```bash
-uv venv && uv pip install -e ".[dev]"
+git clone https://github.com/NimbleOx/market-trends.git
+cd market-trends
+uv venv
+source .venv/bin/activate
+uv pip install -e ".[dev]"
 
-trends list          # what this repo publishes
-trends check         # compute everything, write nothing
-trends build         # compute everything, write dist/
-TRENDS_REFRESH=1 trends build   # ignore the cache and refetch
+trends list
+trends build
 ```
 
-Activate the venv first, or prefix each command with `uv run`. Install editable
-and run from the checkout: `cache/` and `dist/` are found relative to the source
-tree, not the working directory.
+The first build downloads the upstream data, computes and validates every
+series, and writes **15 files**: seven JSON files, seven CSV files, and an index.
+It needs internet access; the current adapters do not require API keys. Later
+builds reuse the local cache until you request a refresh.
 
-## What it publishes
+Keep the editable installation (`-e`) and the checkout together. The default
+`cache/` and `dist/` paths are resolved from the source tree, even when you run
+`trends` from another directory. See the [CLI reference](docs/cli.md) for custom
+output paths and troubleshooting.
 
-| Series | Measures | Frequency | From |
+## Read the output
+
+You can inspect the six series committed under `dist/` immediately after
+cloning. To generate all seven series locally, run the full build above.
+
+After a successful full build:
+
+```text
+dist/
+├── index.json                    # Available series and relative file paths
+└── series/
+    ├── sp500-in-gold.json         # Metadata, sources, and observations
+    ├── sp500-in-gold.csv          # date,value rows
+    └── ...                       # The other six series, in both formats
+```
+
+For example, run this Python code from the checkout root:
+
+```python
+import json
+from pathlib import Path
+
+series = json.loads(Path("dist/series/sp500-in-gold.json").read_text(encoding="utf-8"))
+print(series["title"], series["unit"])
+print(series["observations"][-1])  # {"date": "YYYY-MM-DD", "value": ...}
+```
+
+The [output reference](docs/output.md) documents every field, date conventions,
+timestamps, and CSV loading. Keep each CSV with its JSON: source and licence
+metadata appear only in the JSON.
+
+The repository includes generated files for six series. Bitcoin output is
+git-ignored under the project's data policy, so a fresh clone's index can refer
+to missing Bitcoin files until you run a full build.
+
+## Available series
+
+| ID | Measure | Frequency | History begins |
 | --- | --- | --- | --- |
-| `sp500-in-gold` | The S&P Composite divided by the price of gold | monthly | 1871 |
-| `btc-in-gold` | Bitcoin divided by the price of gold | monthly | 2010 |
-| `buffett-indicator` | US corporate equities as a share of GDP | quarterly | 1947 |
-| `corporate-profit-share` | After-tax corporate profits as a share of GDP | quarterly | 1947 |
-| `market-value-per-dollar-of-profit` | Corporate equities divided by after-tax profits | quarterly | 1947 |
-| `federal-deficit-share` | Federal expenditures less receipts, as a share of GDP | quarterly | 1947 |
-| `effective-tariff-rate` | Customs duties as a share of goods imports | quarterly | 1992 |
+| `sp500-in-gold` | S&P Composite index divided by the gold price | Monthly | 1871 |
+| `btc-in-gold` | Bitcoin price divided by the gold price | Monthly | 2010 |
+| `buffett-indicator` | Nonfinancial corporate equity value as a percentage of GDP | Quarterly | 1947 |
+| `corporate-profit-share` | After-tax corporate profits as a percentage of GDP | Quarterly | 1947 |
+| `market-value-per-dollar-of-profit` | Nonfinancial corporate equity value divided by after-tax profits | Quarterly | 1947 |
+| `federal-deficit-share` | Federal current expenditures minus receipts, as a percentage of GDP | Quarterly | 1947 |
+| `effective-tariff-rate` | Customs duties as a percentage of goods imports | Quarterly | 1992 |
 
-Each lands in `dist/series/<id>.json`, with a CSV of the observations beside
-it, and `dist/index.json` lists them all.
-Every series module opens with a docstring saying why it is built the way it
-is, including the tradeoffs; the `description` field in the JSON is the shorter
-version the site shows beside the chart.
+See [Series](docs/series.md) for formulas, units, joins, rounding, and limitations.
+In particular, gold prices before 1960 repeat annual averages in monthly rows;
+the monthly output does not imply monthly gold price detail for that period.
 
-## Layout
+## Common commands
 
-| Path | What lives there |
+Run these with the virtual environment active:
+
+```bash
+trends list                                      # List registered series IDs
+trends check                                     # Compute and validate; leave dist/ untouched
+trends check --only sp500-in-gold                  # Check one series
+trends build --only sp500-in-gold --out /tmp/trends-preview
+TRENDS_REFRESH=1 trends build                     # Download fresh inputs and rebuild dist/
+```
+
+`check` can download and update cached inputs. It skips writing output files.
+Cached responses have no automatic expiry, and an ordinary check does not
+establish that the upstream data is current or reachable.
+
+**Use a separate output directory for partial builds.** A build replaces the
+index and removes JSON and CSV files in its `series/` directory that were not
+produced by that run. `--only` therefore removes unselected series from that
+output directory. The [CLI reference](docs/cli.md) explains refresh behavior,
+failure modes, and exit codes.
+
+## Work on the code
+
+```bash
+ruff check src tests
+pytest -m "not network"
+```
+
+The offline tests check the schema and emitted files. After changing a source
+adapter or a calculation, also run `pytest -m network`: it checks every series,
+includes historical value assertions, and exercises downloads into empty
+temporary caches. It requires network access even if your checkout's cache is
+full.
+
+| Path | Responsibility |
 | --- | --- |
-| `src/market_trends/sources/` | How to get numbers out of one upstream. One module per feed. |
-| `src/market_trends/series/` | How to make one published series out of sources. One module per series. |
-| `src/market_trends/registry.py` | The list of series the build publishes. A series is added here and nowhere else. |
-| `src/market_trends/schema.py` | The contract, and the checks that enforce it before anything is written. |
-| `src/market_trends/emit.py` | Writes `dist/`. One observation per line, so a revision reads as a one-line diff. |
-| `src/market_trends/cli.py` | `trends build`, `trends check`, `trends list`. |
-| `cache/` | Raw upstream responses. Never committed; a clone refetches. See `cache/README.md`. |
-| `docs/` | The [docs site](https://nimbleox.github.io/market-trends/), built with MkDocs. The CLI page is the one to read first. |
-| `dist/` | The published output: JSON with provenance, and CSV with the numbers alone. The site vendors the JSON. |
+| [`src/market_trends/sources/`](src/market_trends/sources/) | Fetch and parse upstream responses; attach source metadata. |
+| [`src/market_trends/series/`](src/market_trends/series/) | Join inputs and compute each ratio; module docstrings explain the methodology. |
+| [`registry.py`](src/market_trends/registry.py) | Register builders used by the CLI and generic series tests. |
+| [`schema.py`](src/market_trends/schema.py) | Define Python data objects, validation, and the JSON shape. |
+| [`emit.py`](src/market_trends/emit.py) | Write JSON, CSV, and the index; remove stale series files. |
+| [`cli.py`](src/market_trends/cli.py) | Parse commands and coordinate computation, validation, and output. |
+| [`cache/`](cache/README.md) | Store downloaded responses locally; raw data files are git-ignored. |
+| [`tests/`](tests/) | Check validation, serialization, and calculations. |
+| [`docs/`](docs/index.md) | Source for the MkDocs documentation site. |
+| [`dist/`](dist/) | Generated data for downstream consumers. |
 
-Keeping `sources/` and `series/` apart means swapping a gold price feed touches
-one file and no series logic.
+The [development guide](docs/development.md) covers adding a series or source,
+reviewing data changes, running CI checks locally, and previewing the docs.
 
-## Licensing is a per-source decision
+## Data sources and licences
 
-Every `Source` carries a `licence`, and `validate()` refuses to publish a series
-whose source says `unknown`. That is deliberate: the point of the field is that
-somebody decided, not that a string exists.
+The code is licensed under [MIT](LICENSE). Upstream data has separate terms,
+recorded in each series' JSON `sources` array. See
+[Sources and licences](docs/sources.md) for the source inventory, upstream links,
+and the distinction between recorded licence metadata and reuse permission.
 
-No upstream data is committed. Everything under `cache/` is refetched on a
-fresh clone, which keeps this repo from being the system of record for numbers
-it did not produce, and from redistributing a source whose terms may not allow
-it. Every source below is independently retrievable from its own upstream, and
-`pytest -m network` builds the whole set from an empty cache to prove it.
+Raw upstream responses are never committed. The `open` and `restricted` cache
+directories record the project's classification of each source; the cache
+flag does not enforce restrictions on generated output. Bitcoin JSON and CSV
+are excluded explicitly in `.gitignore`.
 
-The `open`/`restricted` split still records which sources *could* be
-redistributed. It no longer decides what ships, but it is a required argument to
-`fetch()`, so a new source cannot skip the decision — and it governs what may
-leave this repo downstream.
+## Project policy
 
-Current sources:
+This is a personal project published for transparency. It does not accept
+contributions; pull requests will be closed and feature requests will not be
+taken up. See [CONTRIBUTING.md](CONTRIBUTING.md) for the policy and links for
+working on a fork.
 
-| Source | Used for | Licence | Class |
-| --- | --- | --- | --- |
-| `datasets/s-and-p-500` | S&P Composite, monthly since 1871 (Shiller) | ODC-PDDL-1.0 | open |
-| `datasets/gold-prices` | Gold, monthly since 1833 | ODC-PDDL-1.0 | open |
-| FRED `NCBEILQ027S` (Fed Z.1) | Corporate equities | Public domain | open |
-| FRED `GDP` (BEA) | GDP | Public domain | open |
-| FRED `CP` (BEA) | Corporate profits after tax | Public domain | open |
-| FRED `FGRECPT` (BEA) | Federal current receipts | Public domain | open |
-| FRED `FGEXPND` (BEA) | Federal current expenditures | Public domain | open |
-| FRED `B235RC1Q027SBEA` (BEA) | Customs duties | Public domain | open |
-| FRED `BOPGIMP` (Census) | Goods imports, balance of payments basis | Public domain | open |
-| blockchain.com charts API | Bitcoin market price, daily since 2010 | No open licence stated | restricted |
-
-Bitcoin is the one restricted source. blockchain.com states no open licence,
-only its general terms, so what this repo publishes from it is a *ratio* rather
-than their prices — and even those computed files, `dist/series/btc-in-gold.json`
-and its CSV, are git-ignored and rebuilt by a clone rather than shipped in one.
-The series code is public; the numbers come from upstream on your own machine.
-
-Gold used to come from the World Bank Pink Sheet directly. Two reasons it does
-not now: the Pink Sheet URL carries the release year in its path, so a hardcoded
-link keeps serving last year's file rather than 404ing, and the datasets copy
-reaches back to 1833 instead of 1960 — which is what lets sp500-in-gold start
-where Shiller's prices do.
-
-## Where to look for data
-
-[github.com/orgs/datasets/repositories](https://github.com/orgs/datasets/repositories?type=all)
-is worth checking before going hunting. The org maintains cleaned, versioned
-copies of a lot of standard economic and financial series, each with a
-`datapackage.json` declaring a licence and a history of automated commits, which
-means an upstream revision arrives as a readable diff rather than a number that
-silently changed. `s-and-p-500` is where the equity side of sp500-in-gold comes
-from.
-
-They publish the same data to datahub.io. Prefer the GitHub repo: identical
-bytes, but the licence is machine-readable and the history is visible.
-
-## Tests
-
-```bash
-ruff check src tests      # lint
-pytest -m "not network"   # schema, emit, formatting
-pytest -m network         # builds every series against the cache or live upstreams
-```
-
-The network-marked tests include value assertions against turning points the
-charts exist to show — the 1982 trough, the dot-com peak, 2009, 2021 — so a
-units mistake or a bad join fails loudly rather than shifting a level quietly.
-
-CI runs the lint and the no-network tests on every push and pull request to
-`main`, and the network tests weekly against the live upstreams so a moved URL
-surfaces before it breaks somebody's fresh clone.
-
-The docs site is MkDocs: `uv pip install -e ".[docs]"` then `mkdocs serve` to
-preview it. CI builds it with `--strict` and deploys it to GitHub Pages from
-`main`. The [Development page](https://nimbleox.github.io/market-trends/development/)
-has the longer version.
-
-## Contributing
-
-This project does not accept contributions. It exists to open-source the code
-and data behind the charts on my site, so the computation and the provenance of
-every number are open to inspection. [CONTRIBUTING.md](CONTRIBUTING.md) says
-so at more length, and carries the notes you would want if you fork it.
-
-## Licence
-
-Two different things live here and they are not under the same terms.
-
-**The code** — everything in `src/` and `tests/` — is MIT. See `LICENSE`.
-
-**The data** in `dist/` is not mine to relicense. Each series carries its own
-provenance: every emitted JSON has a `sources` array naming the upstream, its
-URL, and its licence, which is the authoritative statement for that series.
-`validate()` refuses to publish a series whose source licence is `unknown`, so
-the field is never decoration. The CSV beside each JSON carries the same numbers
-under the same terms; it has no room to say so itself, which is why the JSON is
-the record. If you reuse a series, honour the terms recorded in its JSON — for
-the current set that means ODC-PDDL-1.0 and US public domain, which between them
-ask for little beyond attribution.
+Much of the code was written with AI assistance. The repository includes
+validation and selected historical checks to help inspect the results; these
+checks do not independently verify every observation.

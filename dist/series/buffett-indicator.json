@@ -6,7 +6,7 @@
   "precision": 1,
   "frequency": "quarterly",
   "scale": "linear",
-  "description": "The market value of US corporate equities as a percentage of GDP. Built from the Federal Reserve's Financial Accounts (Z.1), which counts all equity issued by nonfinancial corporate business whether or not it is publicly listed, so the level runs above charts built on a total-market index. The shape over time is the same.",
+  "description": "The quarter-end value of US nonfinancial corporate equities as a percentage of annualised GDP. The Federal Reserve's Financial Accounts (Z.1) include publicly traded and closely held nonfinancial corporations. This coverage differs from a total-market stock index, so levels and movements can differ between constructions.",
   "sources": [
     {
       "name": "Federal Reserve Board, Financial Accounts of the United States (Z.1)",
@@ -21,7 +21,7 @@
       "retrievedAt": "2026-09-04"
     }
   ],
-  "generatedAt": "2026-09-04T20:13:57+00:00",
+  "generatedAt": "2026-09-04T21:29:42+00:00",
   "firstDate": "1947-10-01",
   "lastDate": "2026-01-01",
   "observationCount": 302,

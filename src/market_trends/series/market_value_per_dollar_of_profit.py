@@ -1,14 +1,12 @@
-"""What the market pays for a dollar of corporate profit.
+"""Nonfinancial corporate equity value per dollar of after-tax corporate profit.
 
-The second of the two terms the Buffett indicator multiplies together, and the
-one that carries the valuation story. Market value over GDP is profits over GDP
-times this, so a rise here is investors repricing the same earnings rather than
-corporations earning more.
+This is the valuation factor in the Buffett indicator decomposition. With the
+same source observations and shared dates, multiplying it by the percentage
+profit share returns the percentage Buffett indicator before rounding.
 
-Effectively an aggregate price-to-earnings ratio, but built from the same two
-sources as the Buffett indicator itself so the decomposition is exact rather
-than approximate: dividing this series into `buffett-indicator` returns
-`corporate-profit-share` to within rounding.
+It is not a conventional P/E for a matched set of companies: the equity input
+covers nonfinancial corporations and CP is a broader corporate profit measure.
+The multiple can change through changes in equity value, profits, or both.
 """
 
 from __future__ import annotations
@@ -39,10 +37,10 @@ def build() -> Series:
         precision=1,
         frequency="quarterly",
         description=(
-            "The market value of US corporate equities divided by after-tax corporate profits. "
-            "This is the valuation half of the Buffett indicator, an aggregate price-to-earnings "
-            "ratio: it moves when investors reprice the same earnings rather than when "
-            "corporations earn more."
+            "US nonfinancial corporate equity value divided by annualised after-tax corporate "
+            "profits. This is the valuation factor in the Buffett indicator decomposition. "
+            "The profit measure has broader corporate coverage, so this is not a P/E ratio for "
+            "a matched set of companies. It can change when equity values, profits, or both change."
         ),
         sources=[equities_source, profits_source],
         observations=observations,

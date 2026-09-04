@@ -1,19 +1,14 @@
-"""The federal deficit as a share of GDP, on the same basis as the profit share.
+"""Federal current expenditures minus receipts as a percentage of GDP.
 
-Charted against `corporate-profit-share` because one sector's deficit is another
-sector's surplus: government spending in excess of receipts becomes income
-elsewhere, and some of it lands as corporate profit. Reading the two lines
-together is the point of the series existing.
+Receipts, expenditures, and GDP use the National Income and Product Accounts
+basis and are billions of dollars at seasonally adjusted annual rates. This
+supports a comparison with the profit share, but not a one-for-one causal
+claim about deficits and corporate profits.
 
-Built from NIPA receipts and expenditures rather than the unified budget balance
-so it sits on the same accounting basis and the same quarterly frequency as the
-profit share it is drawn beside. That basis matters: these are quarterly figures
-at annual rates, so a single extraordinary quarter reads far higher than the
-fiscal-year deficit for the same period. The second quarter of 2020 shows about
-27% of GDP where fiscal 2020 as a whole was 14.9%.
-
-Sign is flipped so a deficit reads positive, which is the direction the chart is
-about. Surpluses, of which there are few, cross below zero.
+The result measures the current-account deficit on this basis, not the unified
+budget balance or a fiscal-year total. A single quarter's annualised ratio
+can differ substantially from a whole fiscal year. Expenditures minus receipts
+makes a deficit positive and a surplus negative.
 """
 
 from __future__ import annotations
@@ -51,9 +46,9 @@ def build() -> Series:
         frequency="quarterly",
         description=(
             "Federal current expenditures less current receipts, as a percentage of GDP, on the "
-            "national accounts basis rather than the unified budget. Quarterly figures at annual "
-            "rates, so an extraordinary quarter reads well above the fiscal-year deficit for the "
-            "same period. A deficit is positive here; the few surpluses cross below zero."
+            "national accounts basis. All inputs are quarterly figures at seasonally adjusted "
+            "annual rates. This differs from the unified budget balance and from a fiscal-year "
+            "total. A deficit is positive; a surplus is negative."
         ),
         sources=[receipts_source, expenditures_source, gdp_source],
         observations=observations,

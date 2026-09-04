@@ -1,8 +1,9 @@
-"""The published contract, and the checks that enforce it on write.
+"""Data objects, validation rules, and the serialized JSON shape.
 
-The site vendors whatever lands in ``dist/`` and draws it without inspecting it,
-so a malformed series here becomes a broken chart there. Everything is validated
-before emit, and a failure aborts the build rather than writing a partial file.
+The CLI and emitter validate every selected series before writing output.
+Validation checks structure and values; it does not establish data freshness,
+formula correctness, or permission to reuse a source. See docs/output.md for
+the contract and its limits.
 """
 
 from __future__ import annotations
@@ -27,9 +28,8 @@ class Source:
 
     name: str
     url: str
-    #: Short licence identifier, quoted on the site beside the chart. Every
-    #: source has to state one: "unknown" is not an acceptable value, because
-    #: the point of recording it is to have decided.
+    #: Licence identifier or statement of source terms. Validation rejects
+    #: empty strings and "unknown"; it does not verify the recorded terms.
     licence: str
     retrieved_at: date
 
@@ -112,8 +112,11 @@ def validate(series: Series) -> None:
 
 
 def to_dict(series: Series) -> dict:
-    """The published shape. Kept separate from the dataclass so the wire format
-    can change without the computation caring."""
+    """Validate and serialize a series, including a new UTC generation timestamp.
+
+    JSON keys are independent of the dataclass field names. Changing the wire
+    format requires coordinating with consumers and reviewing SCHEMA_VERSION.
+    """
     validate(series)
 
     return {

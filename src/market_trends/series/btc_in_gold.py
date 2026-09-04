@@ -1,12 +1,12 @@
-"""Bitcoin measured in ounces of gold.
+"""Bitcoin measured in troy ounces of gold.
 
-The same question sp500-in-gold asks, of an asset whose entire history fits
-inside the last sixteen years of that chart. Both sides are monthly averages, so
-neither is favoured by the sampling.
+Both adapters return monthly averages; their ratio measures the gold equivalent
+of one bitcoin. The Bitcoin average requires at least 20 positive readings,
+which can include an unfinished calendar month. Only matching dates survive.
 
-The range is the difficulty here: the ratio starts near four ten-thousandths of
-an ounce and reaches the high teens, which is four orders of magnitude. It is a
-chart that wants a log scale.
+The ratio spans several orders of magnitude, so a logarithmic display is
+requested. Six stored decimal places preserve small early values even though
+the display metadata requests two decimal places.
 """
 
 from __future__ import annotations
@@ -38,8 +38,9 @@ def build() -> Series:
         scale="log",
         description=(
             "The price of one bitcoin divided by the price of one troy ounce of gold. Both are "
-            "monthly averages. The ratio spans four orders of magnitude, from well under a "
-            "thousandth of an ounce in 2010 to the high teens today."
+            "monthly averages; Bitcoin months require at least 20 positive price readings, "
+            "which can include an unfinished month. The ratio spans several orders of "
+            "magnitude and uses a logarithmic display scale."
         ),
         sources=[bitcoin_source, gold_source],
         observations=observations,

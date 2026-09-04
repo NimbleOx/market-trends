@@ -12,7 +12,7 @@ theme:
   icon:
     logo: material/chart-timeline-variant
   features:
-    - content.action.edit
+    - content.action.view
     - content.code.copy
     - navigation.footer
     - navigation.instant
@@ -40,12 +40,17 @@ theme:
 
 nav:
   - Home: index.md
-  - CLI: cli.md
+  - CLI reference: cli.md
   - Series: series.md
-  - Output: output.md
+  - Output reference: output.md
   - Sources and licences: sources.md
   - Development: development.md
   - Contributing: contributing.md
+
+# Make broken links to page sections fail the strict build in CI, too.
+validation:
+  links:
+    anchors: warn
 
 markdown_extensions:
   - admonition

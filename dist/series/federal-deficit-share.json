@@ -6,7 +6,7 @@
   "precision": 1,
   "frequency": "quarterly",
   "scale": "linear",
-  "description": "Federal current expenditures less current receipts, as a percentage of GDP, on the national accounts basis rather than the unified budget. Quarterly figures at annual rates, so an extraordinary quarter reads well above the fiscal-year deficit for the same period. A deficit is positive here; the few surpluses cross below zero.",
+  "description": "Federal current expenditures less current receipts, as a percentage of GDP, on the national accounts basis. All inputs are quarterly figures at seasonally adjusted annual rates. This differs from the unified budget balance and from a fiscal-year total. A deficit is positive; a surplus is negative.",
   "sources": [
     {
       "name": "US Bureau of Economic Analysis, Federal Government Current Receipts",
@@ -27,7 +27,7 @@
       "retrievedAt": "2026-09-04"
     }
   ],
-  "generatedAt": "2026-09-04T20:13:57+00:00",
+  "generatedAt": "2026-09-04T21:29:42+00:00",
   "firstDate": "1947-01-01",
   "lastDate": "2026-04-01",
   "observationCount": 318,

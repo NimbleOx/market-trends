@@ -8,11 +8,9 @@ __pycache__/
 # MkDocs output. The docs site is built and deployed by CI, never committed.
 /site/
 
-# No upstream data is committed. Everything under cache/ is a response this
-# repo knows how to refetch, so it is retrieved rather than vendored: a clone
-# populates it on the first build. Keeping it out means this repo is never the
-# system of record for numbers it did not produce, and never redistributes a
-# source whose terms may not allow it.
+# Raw upstream responses stay local. A fresh clone downloads missing inputs
+# on its first build or check. Cache classification records the source policy;
+# it does not enforce restrictions on generated output. See docs/sources.md.
 cache/open/*
 cache/restricted/*
 !cache/open/.gitkeep

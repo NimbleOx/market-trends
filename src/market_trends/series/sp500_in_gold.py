@@ -1,13 +1,14 @@
-"""The S&P 500 measured in ounces of gold rather than dollars.
+"""The S&P Composite index level divided by gold's dollar price.
 
-Dividing one price by another strips out the unit both are quoted in, which is
-the point: the line moves only when equities and gold move relative to each
-other, not when the dollar does. The 1980 low and the 2000 high are the two
-readings the chart exists to show.
+The ratio tracks equity prices relative to gold and excludes reinvested
+dividends. It is an index-level comparison, not the value of a purchased share
+or fund. Both inputs use monthly date labels and join by exact date.
 
-Gold is monthly and so is Shiller's price series, so no resampling is needed.
-Both reach back further than the other; the ratio starts in 1871, where Shiller's
-prices begin.
+Gold observations before 1960 are annual averages repeated into monthly rows
+by the upstream package. From 1960 onward gold uses monthly averages. The
+result begins with the available equity history in 1871; the earlier segment
+cannot show within-year gold movements. See ``docs/series.md`` for provenance
+and interpretation.
 """
 
 from __future__ import annotations
@@ -37,9 +38,10 @@ def build() -> Series:
         precision=2,
         frequency="monthly",
         description=(
-            "The S&P Composite index divided by the price of one troy ounce of gold. Pricing one "
-            "asset in another removes the currency both are quoted in, so the line represents "
-            "movement relative to each other."
+            "The S&P Composite index level divided by the USD price of one troy ounce of gold. "
+            "Monthly equity prices are paired with monthly gold averages from 1960 onward; "
+            "earlier gold values are annual averages repeated for each month. This measures "
+            "relative prices and excludes reinvested dividends."
         ),
         sources=[equities_source, gold_source],
         observations=observations,

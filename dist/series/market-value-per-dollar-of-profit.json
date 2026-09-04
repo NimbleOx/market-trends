@@ -6,7 +6,7 @@
   "precision": 1,
   "frequency": "quarterly",
   "scale": "linear",
-  "description": "The market value of US corporate equities divided by after-tax corporate profits. This is the valuation half of the Buffett indicator, an aggregate price-to-earnings ratio: it moves when investors reprice the same earnings rather than when corporations earn more.",
+  "description": "US nonfinancial corporate equity value divided by annualised after-tax corporate profits. This is the valuation factor in the Buffett indicator decomposition. The profit measure has broader corporate coverage, so this is not a P/E ratio for a matched set of companies. It can change when equity values, profits, or both change.",
   "sources": [
     {
       "name": "Federal Reserve Board, Financial Accounts of the United States (Z.1)",
@@ -21,7 +21,7 @@
       "retrievedAt": "2026-09-04"
     }
   ],
-  "generatedAt": "2026-09-04T20:13:57+00:00",
+  "generatedAt": "2026-09-04T21:29:42+00:00",
   "firstDate": "1947-10-01",
   "lastDate": "2026-01-01",
   "observationCount": 302,

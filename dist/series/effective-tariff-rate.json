@@ -6,7 +6,7 @@
   "precision": 1,
   "frequency": "quarterly",
   "scale": "linear",
-  "description": "Customs duties collected as a percentage of the value of goods imported, by quarter. This is the rate importers actually paid, which runs well below the rates announced: exemptions, carve-outs, announced rates that never took effect and switching to suppliers in untariffed countries all sit between the two.",
+  "description": "Customs duties collected as a percentage of the value of goods imported, by quarter. Monthly goods imports are aggregated and annualised to match the duties series. Product mix, exemptions, timing, and sourcing changes can make this aggregate collections-to-imports ratio differ from announced tariff rates.",
   "sources": [
     {
       "name": "US Bureau of Economic Analysis, Federal Government Current Tax Receipts: Customs Duties",
@@ -21,7 +21,7 @@
       "retrievedAt": "2026-09-04"
     }
   ],
-  "generatedAt": "2026-09-04T20:13:57+00:00",
+  "generatedAt": "2026-09-04T21:29:42+00:00",
   "firstDate": "1992-01-01",
   "lastDate": "2026-04-01",
   "observationCount": 138,

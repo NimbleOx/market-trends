@@ -1,7 +1,8 @@
-"""Every series the build publishes.
+"""Map public series IDs to their zero-argument builders.
 
-A series is added here and nowhere else: the CLI, the tests and the emitted
-index all read from this list, so there is one place to forget.
+The CLI and generic network tests use this registry. A build's index includes
+the selected builders' output. New series also need documentation, meaningful
+value checks, and any applicable output exclusions; see docs/development.md.
 """
 
 from __future__ import annotations

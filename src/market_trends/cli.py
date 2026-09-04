@@ -30,14 +30,22 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="trends")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    build = sub.add_parser("build", help="compute every series and write dist/")
-    build.add_argument("--only", nargs="*", metavar="ID", help="limit to these series")
-    build.add_argument("--out", type=Path, default=DIST)
+    build = sub.add_parser("build", help="compute, validate, and replace generated output")
+    build.add_argument(
+        "--only", nargs="*", metavar="ID",
+        help="limit to these IDs; no IDs selects all; unselected output series are removed",
+    )
+    build.add_argument(
+        "--out", type=Path, default=DIST,
+        help="output directory to create or update (default: %(default)s)",
+    )
 
-    check = sub.add_parser("check", help="compute every series but write nothing")
-    check.add_argument("--only", nargs="*", metavar="ID")
+    check = sub.add_parser("check", help="compute and validate without writing output files")
+    check.add_argument(
+        "--only", nargs="*", metavar="ID", help="limit to these IDs; no IDs selects all"
+    )
 
-    sub.add_parser("list", help="list the series this repo publishes")
+    sub.add_parser("list", help="list registered series IDs")
 
     args = parser.parse_args(argv)
 
@@ -59,7 +67,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if args.command == "check":
-        print("all series valid; nothing written")
+        print("selected series valid; no output files written")
         return 0
 
     written = write(built, args.out)

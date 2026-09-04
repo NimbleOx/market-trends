@@ -9,8 +9,8 @@ Every series is written twice. The JSON carries the metadata and the provenance
 and is what the site draws from. The CSV carries the observations alone, for
 anyone who wants the numbers in a spreadsheet or a dataframe without parsing
 JSON first. The values are encoded by the same function in both, so the two
-files cannot disagree. A CSV has no room for a licence, which is why the JSON
-beside it stays the authoritative statement of the terms.
+files carry the same numeric text. CSV metadata is omitted for straightforward
+loading, so keep the JSON beside it for source and licence information.
 """
 
 from __future__ import annotations
@@ -55,9 +55,12 @@ def _dump_csv(payload: dict) -> str:
 
 
 def write(series_list: list[Series], out: Path) -> list[Path]:
-    """Write every series, in both formats, plus the index. Nothing is written
-    until all of them validate, so a failure cannot leave ``dist/`` half
-    updated."""
+    """Validate the selected series, then write JSON, CSV, and an index.
+
+    Validation failures leave output untouched. File writes and stale-file
+    cleanup are sequential, so an I/O failure can leave partial output. Any
+    unselected JSON or CSV directly under ``out/series`` is removed.
+    """
     payloads = {series.id: to_dict(series) for series in series_list}
 
     series_dir = out / "series"

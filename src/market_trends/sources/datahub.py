@@ -1,21 +1,18 @@
-"""Long-run series published by the datasets org.
+"""Long-run equity and gold prices from the datasets GitHub repositories.
 
-Monthly back to 1871. Shiller publishes the original himself, but states no
-licence for it and serves it from a site-builder blob URL that changes whenever
-he re-uploads. The datasets org redistributes the same numbers under an explicit
-Open Data Commons Public Domain Dedication, from a stable URL, as CSV rather
-than a legacy .xls. That is three problems solved by changing where we fetch
-from, which is the whole reason sources are separated from series.
+The packages supply CSV files, machine-readable licence declarations, and
+visible processing history. Requests use the live ``main`` branch, so an
+uncached build or refresh can receive revised observations.
 
-Fetched from the GitHub repository rather than the datahub.io mirror. The bytes
-are identical, but the repo declares the licence in datapackage.json, carries a
-visible history of monthly automated commits so a revision can be read as a
-diff, and can be pinned to a commit if that is ever needed.
+The equity package extends Shiller's history after June 2023 using FRED's
+SP500. Its PDDL declaration does not resolve restrictions on that underlying
+S&P Dow Jones Indices data. The current adapter records the package declaration
+and routes both responses to ``cache/open``; neither routing nor deriving a
+ratio establishes redistribution rights. See ``docs/sources.md``.
 
-One caveat worth keeping in view: DataHub extends the series past mid-2023 with
-FRED's SP500, which is S&P Dow Jones Indices data and not itself freely
-redistributable. The dedication covers the compilation; this repo publishes a
-derived ratio rather than the levels either way.
+The gold package has monthly prices from 1960 onward and repeats annual
+historical averages into monthly rows before 1960. A monthly date alone does
+not establish the frequency of the original observation.
 """
 
 from __future__ import annotations
@@ -37,7 +34,7 @@ GOLD_PAGE = "https://github.com/datasets/gold-prices"
 
 
 def monthly_prices() -> tuple[list[Observation], Source]:
-    """S&P Composite, monthly. Shiller averages the daily closes within a month."""
+    """Read positive monthly SP500 values from the Shiller/FRED data package."""
     text = fetch(SP500_URL, name="datahub-sp500.csv", redistributable=True)
 
     observations: list[Observation] = []
@@ -68,17 +65,11 @@ def monthly_prices() -> tuple[list[Observation], Source]:
 
 
 def gold_prices() -> tuple[list[Observation], Source]:
-    """Gold, monthly, back to 1833.
+    """Read gold prices in USD per troy ounce using monthly date labels.
 
-    The World Bank's Pink Sheet from 1960, spliced onto the Timothy Green
-    historical table before that. Fetching it here rather than from the World
-    Bank directly buys 127 years of history and a link that does not carry a
-    release year in its path -- the Pink Sheet URL is versioned, so a hardcoded
-    one quietly keeps serving last year's file instead of 404ing.
-
-    The tradeoff is that revisions arrive here later: the datasets copy still
-    carries the pre-revision figures for a few dozen Bretton Woods era months,
-    where gold was pegged and the difference is cents.
+    The package combines World Bank monthly data from 1960 with Timothy Green's
+    historical annual averages before 1960, repeated into monthly rows upstream.
+    Parsing a YYYY-MM label produces the first day of that month.
     """
     text = fetch(GOLD_URL, name="datahub-gold.csv", redistributable=True)
 

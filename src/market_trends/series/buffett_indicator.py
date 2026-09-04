@@ -1,15 +1,14 @@
-"""The Buffett indicator: US corporate equities as a share of GDP.
+"""Nonfinancial corporate equity value as a percentage of annualised GDP.
 
-Both inputs are US federal statistics and so are public domain, which is why
-this construction is used rather than one built on a proprietary index. The
-tradeoff is stated in the description below and should stay there: Z.1 measures
-all corporate equity issued by nonfinancial corporate business, listed or not,
-so the level runs above charts built on a total-market index. At the 2021 peak
-this reads about 219% where a Wilshire 5000 construction reads about 200%. The
-shape over time, which is what the chart is for, is the same.
+The Federal Reserve's Z.1 input includes publicly traded and closely held
+nonfinancial corporations. Its sector coverage differs from a total-market
+stock index, so neither levels nor movements are interchangeable with every
+other construction of the Buffett indicator.
 
-GDP is quarterly, so the series is quarterly. Interpolating it up to monthly
-would invent detail the source does not have.
+The numerator is a quarter-end stock in millions of dollars; GDP is a quarterly
+flow in billions at a seasonally adjusted annual rate. Convert the numerator
+to billions and join using the upstream quarter labels. Do not interpolate GDP
+to a finer frequency.
 """
 
 from __future__ import annotations
@@ -40,10 +39,10 @@ def build() -> Series:
         precision=1,
         frequency="quarterly",
         description=(
-            "The market value of US corporate equities as a percentage of GDP. Built from the "
-            "Federal Reserve's Financial Accounts (Z.1), which counts all equity issued by "
-            "nonfinancial corporate business whether or not it is publicly listed, so the level "
-            "runs above charts built on a total-market index. The shape over time is the same."
+            "The quarter-end value of US nonfinancial corporate equities as a percentage of "
+            "annualised GDP. The Federal Reserve's Financial Accounts (Z.1) include publicly "
+            "traded and closely held nonfinancial corporations. This coverage differs from "
+            "a total-market stock index, so levels and movements can differ between constructions."
         ),
         sources=[equities_source, gdp_source],
         observations=observations,

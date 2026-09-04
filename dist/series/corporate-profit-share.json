@@ -6,7 +6,7 @@
   "precision": 1,
   "frequency": "quarterly",
   "scale": "linear",
-  "description": "US after-tax corporate profits as a percentage of GDP. This is the profit half of the Buffett indicator: the share of national output that ends up as corporate earnings, before any question of what investors will pay for those earnings.",
+  "description": "US after-tax corporate profits, without inventory valuation and capital consumption adjustments, as a percentage of GDP. Both inputs use seasonally adjusted annual rates. This is the profit factor in the algebraic decomposition of the Buffett indicator; its corporate coverage is broader than the nonfinancial equity numerator.",
   "sources": [
     {
       "name": "US Bureau of Economic Analysis, Corporate Profits After Tax",
@@ -21,7 +21,7 @@
       "retrievedAt": "2026-09-04"
     }
   ],
-  "generatedAt": "2026-09-04T20:13:57+00:00",
+  "generatedAt": "2026-09-04T21:29:42+00:00",
   "firstDate": "1947-01-01",
   "lastDate": "2026-04-01",
   "observationCount": 318,

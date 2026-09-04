@@ -1,84 +1,157 @@
 # Sources and licences
 
-Every `Source` carries a `licence`, and `validate()` refuses to publish a series
-whose source says `unknown`. That is deliberate: the point of the field is that
-somebody decided, not that a string exists.
+Each generated series JSON records its upstream sources in `sources`, with a
+name, URL, licence description, and `retrievedAt` date. Keep this JSON with
+the companion CSV when reusing the observations: the CSV contains only
+`date,value` rows and no provenance.
 
-## Current sources
+The code is MIT-licensed. That licence does not grant rights to upstream data.
+The source fields document this project's recorded decisions; the upstream
+terms remain the basis for assessing a particular use.
 
-| Source | Used for | Licence | Class |
+## Source inventory
+
+The cache column shows where the **current implementation** stores responses.
+It is a routing decision, not an independent verification of rights. External
+references on this page were reviewed on 4 September 2026.
+
+| Input | Provider and use | Recorded licence | Cache |
 | --- | --- | --- | --- |
-| `datasets/s-and-p-500` | S&P Composite, monthly since 1871 (Shiller) | ODC-PDDL-1.0 | open |
-| `datasets/gold-prices` | Gold, monthly since 1833 | ODC-PDDL-1.0 | open |
-| FRED `NCBEILQ027S` (Fed Z.1) | Corporate equities | Public domain | open |
-| FRED `GDP` (BEA) | GDP | Public domain | open |
-| FRED `CP` (BEA) | Corporate profits after tax | Public domain | open |
-| FRED `FGRECPT` (BEA) | Federal current receipts | Public domain | open |
-| FRED `FGEXPND` (BEA) | Federal current expenditures | Public domain | open |
-| FRED `B235RC1Q027SBEA` (BEA) | Customs duties | Public domain | open |
-| FRED `BOPGIMP` (Census) | Goods imports, balance of payments basis | Public domain | open |
-| blockchain.com charts API | Bitcoin market price, daily since 2010 | No open licence stated | restricted |
+| [`datasets/s-and-p-500`](https://github.com/datasets/s-and-p-500) | Shiller history, extended with FRED S&P 500 prices; equity/gold ratio | `ODC-PDDL-1.0`¹ | `open/` |
+| [`datasets/gold-prices`](https://github.com/datasets/gold-prices) | Historical gold and World Bank prices; both gold ratios | `ODC-PDDL-1.0`¹ | `open/` |
+| FRED [`NCBEILQ027S`](https://fred.stlouisfed.org/series/NCBEILQ027S) | Federal Reserve; nonfinancial corporate equities | Public domain (US federal government work) | `open/` |
+| FRED [`GDP`](https://fred.stlouisfed.org/series/GDP) | BEA; gross domestic product | Public domain (US federal government work) | `open/` |
+| FRED [`CP`](https://fred.stlouisfed.org/series/CP) | BEA; after-tax corporate profits, without IVA and CCAdj | Public domain (US federal government work) | `open/` |
+| FRED [`FGRECPT`](https://fred.stlouisfed.org/series/FGRECPT) | BEA; federal current receipts | Public domain (US federal government work) | `open/` |
+| FRED [`FGEXPND`](https://fred.stlouisfed.org/series/FGEXPND) | BEA; federal current expenditures | Public domain (US federal government work) | `open/` |
+| FRED [`B235RC1Q027SBEA`](https://fred.stlouisfed.org/series/B235RC1Q027SBEA) | BEA; customs duties | Public domain (US federal government work) | `open/` |
+| FRED [`BOPGIMP`](https://fred.stlouisfed.org/series/BOPGIMP) | Census and BEA; goods imports, balance-of-payments basis | Public domain (US federal government work) | `open/` |
+| [Blockchain.com market price](https://www.blockchain.com/explorer/charts/market-price) | Bitcoin prices | No open licence stated; blockchain.com terms | `restricted/` |
 
-FRED redistributes other people's data under their terms, so a licence there
-is a property of the individual series rather than of FRED. Every series
-fetched from it is named in `LICENCES` in `sources/fred.py` with a decision
-already made, and an unknown id raises rather than quietly publishing something
-that may not be republishable. FRED is read through its no-key CSV endpoint,
-which is what keeps a clone buildable without secrets.
+¹ These are the data-package maintainers' declarations. See the limitations
+below, particularly the S&P 500 extension.
 
-## Nothing upstream is committed
+## FRED data and service access
 
-Everything under `cache/` is refetched on a fresh clone. That keeps this repo
-from being the system of record for numbers it did not produce, and from
-redistributing a source whose terms may not allow it. Every source above is
-independently retrievable from its own upstream, and `pytest -m network` builds
-the whole set from an empty cache to prove it. CI runs that weekly, so a moved
-URL surfaces there rather than on somebody's fresh clone.
+The seven FRED inputs above carry the “Public Domain: Citation Requested”
+classification on their series pages. FRED hosts data from many providers;
+other series can have different restrictions. Cite both the original provider
+and FRED when using these records, following the suggested citation on each
+series page.
 
-The cache has two subdirectories, `cache/open` and `cache/restricted`. Neither
-is committed, so the split no longer decides what ships. What it still does is
-force the decision: `redistributable` is a required argument to `fetch()`, so a
-source cannot be added without saying which it is. It also governs what may
-leave the repo downstream.
+The adapter uses `https://fred.stlouisfed.org/graph/fredgraph.csv?id=<ID>`
+and requires no API key. `LICENCES` in `src/market_trends/sources/fred.py`
+lists every accepted ID, its source name, licence text, and cache decision.
+Requesting an ID absent from that mapping raises `KeyError` before a fetch.
 
-## The one restricted source
+A public-domain data classification does not resolve the terms for accessing
+the hosting service. The current FRED terms include restrictions on automated
+extraction and caching, with separate provisions for the API. The no-key
+fetcher's technical availability is not evidence of permission for a
+particular access pattern or downstream use. Review the
+[FRED service terms](https://fred.stlouisfed.org/legal/) when assessing or
+changing this integration.
 
-Bitcoin comes from blockchain.com, which states no open licence, only its
-general terms. So what this repo publishes from it is a *ratio* rather than
-their prices, and even those computed files, `dist/series/btc-in-gold.json`
-and its CSV, are git-ignored and rebuilt by a clone rather than shipped in one.
-The series code is public; the numbers come from upstream on your own machine.
+## Data packages: declarations and underlying sources
 
-## Why gold comes from the datasets org
+Both `datasets` packages declare PDDL. The
+[PDDL text](https://opendatacommons.org/licenses/pddl/1-0/) explains the rights
+being dedicated, notes that a party can license only rights it holds, and does
+not itself require attribution. Preserve attribution and provenance for
+traceability, and check the underlying source terms as well as the package's
+declaration.
 
-Gold used to come from the World Bank Pink Sheet directly. Two reasons it does
-not now: the Pink Sheet URL carries the release year in its path, so a
-hardcoded link keeps serving last year's file rather than 404ing, and the
-datasets copy reaches back to 1833 instead of 1960, which is what lets
-`sp500-in-gold` start where Shiller's prices do.
+### S&P Composite prices
 
-## Where to look for more
+The [package README](https://github.com/datasets/s-and-p-500#data) describes
+Shiller data through June 2023, followed by an extension using FRED's `SP500`.
+Its licence statement also acknowledges that the original Shiller data has no
+explicit licence statement. FRED's
+[`SP500` notes](https://fred.stlouisfed.org/series/SP500) identify S&P Dow Jones
+Indices as the owner and state reproduction restrictions.
 
-[github.com/orgs/datasets/repositories](https://github.com/orgs/datasets/repositories?type=all)
-is worth checking before going hunting. The org maintains cleaned, versioned
-copies of a lot of standard economic and financial series, each with a
-`datapackage.json` declaring a licence and a history of automated commits, so
-an upstream revision arrives as a readable diff rather than a number that
-silently changed. They publish the same data to datahub.io. Prefer the GitHub
-repo: identical bytes, but the licence is machine-readable and the history is
-visible.
+The current adapter records only `ODC-PDDL-1.0` and stores this response in
+`cache/open/`; that label does not capture these underlying qualifications.
+The resulting `sp500-in-gold` files are currently committed. Computing a ratio
+does not, by itself, establish permission to redistribute it. This source's
+recorded licence and publication policy need to be considered together before
+reusing or expanding its distribution.
 
-## The licence on the output
+### Gold prices
 
-Two different things live in this repo and they are not under the same terms.
+The [gold package](https://github.com/datasets/gold-prices) combines historical
+records compiled by Timothy Green, originally hosted by the National Mining
+Association, with World Bank data from 1960 onward. It provides a CSV and a
+longer history than the World Bank series alone. The pre-1960 monthly rows
+repeat annual averages; see [Series](series.md#sp500-in-gold) for how this
+affects the ratio.
 
-**The code**, everything in `src/` and `tests/`, is MIT.
+Both adapters fetch GitHub raw files from the packages' `main` branches. Their
+repositories expose source-processing code and revision history, but these
+URLs are not pinned to a commit. Updates can change existing observations.
 
-**The data** in `dist/` is not the author's to relicense. Each series carries
-its own provenance: every emitted JSON has a `sources` array naming the
-upstream, its URL, and its licence, which is the authoritative statement for
-that series. The CSV beside it carries the same numbers under the same terms;
-it has no room to say so itself, which is why the JSON is the record. If you
-reuse a series, honour the terms recorded in its JSON. For the current set that
-means ODC-PDDL-1.0 and US public domain, which between them ask for little
-beyond attribution.
+## Bitcoin data
+
+The project records no open licence for blockchain.com data. Its
+[API terms](https://www.blockchain.com/legal/api-terms) address access, storage,
+display, and distribution, and incorporate the
+[general terms](https://www.blockchain.com/legal/terms). Neither the presence
+of a public endpoint nor converting prices into a ratio is a blanket grant
+of redistribution rights.
+
+The raw response goes into `cache/restricted/`. The default output files
+`dist/series/btc-in-gold.json` and `dist/series/btc-in-gold.csv` are also
+git-ignored. A full build still writes them, and the committed `dist/index.json`
+still lists the series even when those files are absent from a fresh clone.
+Output in a custom `--out` directory is not covered by those two ignore rules.
+
+Git ignores protect the normal repository workflow; they do not filter a
+deployment, upload, archive, or downstream copy. Review the applicable terms
+before including Bitcoin-derived output in one of those destinations.
+
+## What is enforced
+
+| Mechanism | What it does | What it does not establish |
+| --- | --- | --- |
+| `validate()` | Rejects empty licence text and the case-insensitive literal `unknown` | That the licence is accurate, open, or sufficient for reuse |
+| FRED `LICENCES` mapping | Rejects unlisted FRED IDs | That a recorded decision remains current |
+| Required `redistributable` argument | Routes a raw response to `cache/open/` or `cache/restricted/` | Permission to fetch, publish, or redistribute an output |
+| `.gitignore` | Excludes raw cache files and the two default Bitcoin output paths from ordinary Git additions | Protection against forced additions or distribution outside Git |
+| Network tests | Exercise builders against live inputs, including temporary empty caches | Source rights, permanent availability, or unrevised historical data |
+
+A restricted-source description is a valid nonempty licence string, so
+validation permits `btc-in-gold`. The emitter does not inspect the cache class
+or apply a publication filter. Any distribution policy must account for that
+behaviour explicitly.
+
+## Cache, freshness, and reproducibility
+
+Raw cache responses are not committed. A fresh clone fetches each required
+input on first use; later calls reuse its file unless refresh is requested.
+There is no expiry or automatic freshness check. With the project's virtual
+environment activated, recompute using the existing cache without writing
+output files:
+
+```bash
+trends check
+```
+
+To fetch again and validate a single series without replacing `dist/`:
+
+```bash
+TRENDS_REFRESH=1 trends check --only corporate-profit-share
+```
+
+Both commands can write cache files. A refresh replaces each response as it
+arrives; there is no snapshot or rollback across inputs. An unchanged cache
+and unchanged code preserve the observations, but a fresh clone may fetch
+revised history. `generatedAt` changes on each build, and source adapters set
+`retrievedAt` to the local build date even for cached responses. That field is
+not the original download date or the upstream release date.
+
+The weekly and manually dispatched CI upstream job runs
+`uv run pytest -m network -q`. Its empty-cache tests use temporary directories,
+so they test live retrieval even when a developer already has a populated
+cache. See [Development](development.md) for routine verification and
+[Add a source in a fork](development.md#add-a-source-in-a-fork) for extending
+the source inventory.

@@ -1,15 +1,14 @@
-"""What importers actually paid, rather than what was announced.
+"""Customs duties as a percentage of goods imports.
 
-Announced tariff rates overstate collections, and by a lot: there are
-exemptions and carve-outs, announced rates that never take effect, importers
-switching to suppliers in countries that are not tariffed, and incomplete
-enforcement. Dividing duties actually collected by the value of goods actually
-imported sidesteps every one of those and yields the rate that was really paid.
+This aggregate collections-to-imports ratio can differ from announced tariff
+rates because of product mix, exemptions, timing, and sourcing changes. It is
+not the tariff rate charged on an individual shipment.
 
-The numerator is quarterly at annual rates; the denominator is monthly, so the
-three months of each quarter are averaged and annualised onto the same footing
-rather than the numerator being interpolated down. A quarter without all three
-months is dropped instead of being extrapolated from the months that landed.
+Duties are quarterly billions of dollars at a seasonally adjusted annual rate;
+imports are seasonally adjusted monthly millions. Average the three monthly
+imports, annualise, and convert to billions before dividing. The implementation
+requires exactly three observations in a quarter, assuming one per month;
+it does not separately check that those months are distinct.
 """
 
 from __future__ import annotations
@@ -28,8 +27,8 @@ def build() -> Series:
     goods, goods_source = fred.series("BOPGIMP")
 
     # Census reports millions a month; BEA reports billions at an annual rate.
-    # Averaging the months and annualising puts the denominator on the
-    # numerator's footing, which is the only way the ratio means anything.
+    # Average the three monthly observations, then annualise and convert to
+    # billions so numerator and denominator use the same unit and rate basis.
     months: dict[date, list[float]] = defaultdict(list)
     for observation in goods:
         quarter = date(observation.date.year, (observation.date.month - 1) // 3 * 3 + 1, 1)
@@ -57,9 +56,9 @@ def build() -> Series:
         frequency="quarterly",
         description=(
             "Customs duties collected as a percentage of the value of goods imported, by "
-            "quarter. This is the rate importers actually paid, which runs well below the rates "
-            "announced: exemptions, carve-outs, announced rates that never took effect and "
-            "switching to suppliers in untariffed countries all sit between the two."
+            "quarter. Monthly goods imports are aggregated and annualised to match the duties "
+            "series. Product mix, exemptions, timing, and sourcing changes can make this "
+            "aggregate collections-to-imports ratio differ from announced tariff rates."
         ),
         sources=[duties_source, goods_source],
         observations=observations,

@@ -1,30 +1,57 @@
 # Cached upstream responses
 
-A build reads from here rather than from the network, so it is reproducible and
-an upstream revision shows up as a diff in `dist/` instead of a mystery.
-Economic data gets restated quietly; without this you cannot tell a revision
-from a bug.
+The source adapters store downloaded responses here so repeated builds can
+reuse the same inputs. The first use of a source downloads its response;
+later calls read its cached file unless a refresh is requested. There is no
+expiry or automatic freshness check.
 
-Nothing in here is committed. Every file is a response this repo knows how to
-refetch, so a clone arrives empty and populates it on the first build. That
-keeps the repo from becoming the system of record for numbers it did not
-produce, and from redistributing a source whose terms may not allow it.
+Run commands from the repository root after installing the project and
+activating its virtual environment:
 
-Two subdirectories, because the licensing still differs by source even though
-neither is published:
+```bash
+# Validate with cached responses; download any missing inputs.
+trends check
 
-- `open/` — sources whose terms permit redistribution: the `datasets` org
-  copies (ODC-PDDL-1.0) and US federal data (public domain).
-- `restricted/` — sources that may be fetched and used to compute a published
-  series, but not themselves republished.
+# Replace the inputs needed by one series and validate the result.
+TRENDS_REFRESH=1 trends check --only corporate-profit-share
+```
 
-Since neither is committed, the split no longer decides what ships. What it
-still does is force the decision: `redistributable` is a required argument to
-`fetch()`, so you cannot add a source without saying which it is. The point of
-the field is that somebody decided, not that a string exists. It also decides
-what may leave this repo downstream — see `dist/series/btc-in-gold.json` and
-its CSV, which are derived from a restricted source and so are rebuilt rather
-than shipped.
+`check` writes no output series, but it can create or replace cache files.
+`build` uses the same cache behaviour and also writes output. See the
+[CLI reference](../docs/cli.md) for build options.
 
-If you are adding a source, decide which of the two it belongs in before you
-write the fetcher, not after.
+## Storage and distribution
+
+| Directory | Current routing decision |
+| --- | --- |
+| `open/` | Sources the adapters mark `redistributable=True`: the two `datasets` packages and the configured FRED inputs |
+| `restricted/` | Sources marked `redistributable=False`: blockchain.com Bitcoin prices |
+
+Raw responses in both directories are git-ignored. The tracked `.gitkeep`
+retains the empty `open/` directory. A fresh clone contains no cached data and
+needs network access for its first computation.
+
+The required `redistributable` argument to `fetch()` and `fetch_bytes()` selects
+the directory. It does not verify source rights or prevent derived output
+from being written or distributed. In particular, the S&P package's declared
+PDDL licence has underlying-source qualifications. See
+[Sources and licences](../docs/sources.md) before deciding what to publish.
+
+The default Bitcoin output paths in `dist/series/` are separately git-ignored.
+Those rules do not cover custom output directories, archives, or uploads.
+
+## What the cache preserves
+
+Keeping the same responses and code preserves calculated observations across
+builds. It does not guarantee that a fresh clone produces the same history:
+upstream URLs are live and can return revisions. Output timestamps also change,
+and `sources[].retrievedAt` records the local build date, including cache hits,
+rather than the original download date.
+
+A refresh replaces files one at a time; it has no rollback if a later source
+fails. Cache files are named by each adapter, not by a hash of the URL or
+content. When changing a source URL or its meaning, refresh the affected file
+or give it a new name so old responses are not silently reused.
+
+The implementation is in `src/market_trends/sources/cache.py`. The network tests
+also exercise temporary empty caches, independently of files in this directory.

@@ -1,14 +1,13 @@
-"""After-tax corporate profits as a share of GDP.
+"""After-tax corporate profits as a percentage of GDP.
 
-The first of the two terms the Buffett indicator multiplies together. Market
-value over GDP is profits over GDP times market value over profits, so charting
-this alongside `market-value-per-dollar-of-profit` splits the headline ratio
-into the part that is corporations earning more of the economy and the part that
-is investors paying more for those earnings.
+BEA's CP series excludes inventory valuation and capital consumption adjustments.
+Both inputs are billions of dollars at seasonally adjusted annual rates.
 
-After tax rather than before, because the money that accrues to a shareholder is
-what a valuation multiple is applied to. Both inputs are BEA, quarterly, and
-public domain.
+This is one factor in an algebraic decomposition: equity value / GDP equals
+(profits / GDP) times (equity value / profits). The same CP and GDP inputs are
+used across builders, so the identity holds on shared dates before rounding.
+The broader corporate profit measure does not match the nonfinancial coverage
+of the equity numerator exactly.
 """
 
 from __future__ import annotations
@@ -40,9 +39,10 @@ def build() -> Series:
         precision=1,
         frequency="quarterly",
         description=(
-            "US after-tax corporate profits as a percentage of GDP. This is the profit half of "
-            "the Buffett indicator: the share of national output that ends up as corporate "
-            "earnings, before any question of what investors will pay for those earnings."
+            "US after-tax corporate profits, without inventory valuation and capital consumption "
+            "adjustments, as a percentage of GDP. Both inputs use seasonally adjusted annual "
+            "rates. This is the profit factor in the algebraic decomposition of the Buffett "
+            "indicator; its corporate coverage is broader than the nonfinancial equity numerator."
         ),
         sources=[profits_source, gdp_source],
         observations=observations,

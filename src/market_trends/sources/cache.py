@@ -1,16 +1,14 @@
 """Fetch-through cache for upstream responses.
 
-A build reads from the cache, not the network. That makes a rebuild
-reproducible, keeps CI from hammering a public dataset, and turns a quiet
-upstream revision into a git diff rather than a number that changed for no
-visible reason.
+Existing files are reused unless refresh is requested; missing files require
+network access. Keeping the same responses preserves calculated observations,
+but live upstream URLs and output timestamps prevent byte-for-byte
+reproducibility across fresh clones.
 
-Where a response lands depends on whether its source may be redistributed:
-``cache/open`` or ``cache/restricted``. Neither is committed, and a fresh clone
-refetches everything. The split still records a decision, and that decision
-governs what may leave this repo downstream, which is why it belongs to the
-source module and is a required argument rather than a default. See
-``cache/README.md``.
+The required ``redistributable`` flag routes responses to ``cache/open`` or
+``cache/restricted``. Neither contains committed responses. This flag records
+a source decision; it does not enforce a publication policy or verify rights.
+See ``cache/README.md`` and ``docs/sources.md``.
 """
 
 from __future__ import annotations

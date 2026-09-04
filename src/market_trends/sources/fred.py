@@ -1,12 +1,13 @@
-"""FRED, via its no-key CSV endpoint.
+"""FRED observations from the no-key graph CSV endpoint.
 
-FRED redistributes other people's data under their terms, so a licence is a
-property of the individual series rather than of FRED. Every series fetched here
-has to be named in ``LICENCES`` with a decision already made — an unknown id
-raises rather than quietly publishing something that may not be republishable.
+Each accepted ID must be listed in ``LICENCES`` with source attribution,
+licence text, and a cache-routing decision. Unlisted IDs raise before fetching.
+The mapping records this project's decisions; it does not verify the terms
+of the data or hosting service. Review ``docs/sources.md`` when adding an ID
+or changing how this endpoint is used.
 
-The graph CSV endpoint is used instead of the API because it needs no key, which
-keeps a clone buildable without secrets.
+The adapter preserves upstream dates and values, discarding blank or dotted
+missing values. It does not infer missing periods or convert units.
 """
 
 from __future__ import annotations
@@ -23,10 +24,9 @@ PAGE_URL = "https://fred.stlouisfed.org/series/{series_id}"
 
 #: series id -> (human name, licence, redistributable)
 #:
-#: "redistributable" decides whether the raw response is filed under cache/open
-#: or cache/restricted. Neither is committed, but the split governs what may
-#: leave this repo downstream. US federal statistics are public domain; index
-#: levels generally are not.
+#: "redistributable" selects cache/open or cache/restricted; it does not filter
+#: emitted output. These entries record the project's current source decisions.
+#: Data classification and the hosting service's access terms are separate.
 LICENCES: dict[str, tuple[str, str, bool]] = {
     "GDP": (
         "US Bureau of Economic Analysis, Gross Domestic Product",
@@ -89,7 +89,10 @@ def _parse(text: str, series_id: str) -> list[Observation]:
 
 
 def series(series_id: str) -> tuple[list[Observation], Source]:
-    """Fetch one FRED series, returning its observations and its provenance."""
+    """Fetch an allowlisted FRED ID and return observations with source metadata.
+
+    ``retrieved_at`` records the local build date, including cache hits.
+    """
     if series_id not in LICENCES:
         raise KeyError(
             f"FRED series {series_id!r} has no licence decision recorded. "

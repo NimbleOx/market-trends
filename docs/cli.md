@@ -1,23 +1,34 @@
 # CLI
 
-The package installs one command, `trends`, with three subcommands. All three
-read the list of series from `registry.py`, so a series added there appears in
-every command at once.
+Use `trends` to discover, validate, and generate the registered series. The
+examples below assume you have [set up a checkout](development.md#set-up-a-checkout),
+activated its virtual environment, and opened a shell in the repository root.
+If you use uv, you can prefix commands with `uv run`, such as `uv run trends list`.
+
+| Command | Purpose | Side effects |
+| --- | --- | --- |
+| `trends list` | Print the available series IDs. | No data fetches or output writes. |
+| `trends check` | Compute and validate every series. | May download and cache missing source data. Does not write `dist/`. |
+| `trends build` | Compute, validate, and write every series. | May update the cache. Replaces the output index and series files, and removes stale series files. |
 
 ```text
 trends list
-trends check [--only ID ...]
-trends build [--only ID ...] [--out DIR]
+trends check [--only [ID ...]]
+trends build [--only [ID ...]] [--out DIR]
 ```
 
-Run it from a checkout with the venv active, or prefix it with `uv run`.
+Run `trends --help` for command names, or `trends build --help`
+for a command's options.
 
-## trends list
+## List series
 
-Prints the id of every series the repo publishes, one per line, sorted.
+```bash
+trends list
+```
 
-```console
-$ trends list
+The output is one ID per line, sorted alphabetically:
+
+```text
 btc-in-gold
 buffett-indicator
 corporate-profit-share
@@ -27,103 +38,149 @@ market-value-per-dollar-of-profit
 sp500-in-gold
 ```
 
-These ids are the file names under `dist/series/` and the ids the site charts
-by. They are lowercase and hyphenated, and `validate()` refuses anything else.
+All commands use the same registry in `src/market_trends/registry.py`. Use these
+IDs with `--only`; they also identify the JSON and CSV files under `dist/series/`.
+See [Series](series.md) for definitions and formulas.
 
-## trends check
+## Check data without writing output
 
-Builds every series and validates it, and writes nothing. It is `build` without
-the last step, for confirming that the upstreams are reachable and the numbers
-still pass the checks.
-
-```console
-$ trends check
-  building btc-in-gold ... 191 observations, 2010-09-01 to 2026-07-01
-  building buffett-indicator ... 302 observations, 1947-10-01 to 2026-01-01
-  building corporate-profit-share ... 318 observations, 1947-01-01 to 2026-04-01
-  building effective-tariff-rate ... 138 observations, 1992-01-01 to 2026-04-01
-  building federal-deficit-share ... 318 observations, 1947-01-01 to 2026-04-01
-  building market-value-per-dollar-of-profit ... 302 observations, 1947-10-01 to 2026-01-01
-  building sp500-in-gold ... 1867 observations, 1871-01-01 to 2026-07-01
-all series valid; nothing written
+```bash
+trends check
+trends check --only buffett-indicator corporate-profit-share
 ```
 
-Each line reports the count and the span, which is the quickest way to notice
-a source that stopped short.
+`check` computes and validates each selected series in ID order. For each one,
+it prints the observation count and the first and last date, then finishes with:
 
-| Flag | Meaning |
-| --- | --- |
-| `--only ID [ID ...]` | Check only the named series. |
-
-## trends build
-
-Builds every series, validates all of them, then writes `dist/`. Validation
-happens before any file is touched, so a failing series aborts the run and
-leaves `dist/` as it was rather than half updated.
-
-```console
-$ trends build
-  building btc-in-gold ... 191 observations, 2010-09-01 to 2026-07-01
-  ...
-  building sp500-in-gold ... 1867 observations, 1871-01-01 to 2026-07-01
-wrote 15 files to /path/to/market-trends/dist
+```text
+selected series valid; no output files written
 ```
 
-It writes two files per series, `dist/series/<id>.json` and
-`dist/series/<id>.csv`, and an index at `dist/index.json`, then deletes any
-JSON or CSV under `dist/series/` that it did not write on this run. The
-deletion is deliberate: a renamed or removed series would otherwise keep being
-vendored into the site forever. See [Output](output.md) for what each file
-carries.
+Here, “no output files written” refers to published data: a missing cache entry is
+still downloaded and saved under `cache/`. With a populated cache, a successful
+check confirms that the cached inputs are buildable; it does not test whether
+the upstream is reachable or has newer data.
 
-| Flag | Meaning |
-| --- | --- |
-| `--only ID [ID ...]` | Build only the named series. |
-| `--out DIR` | Write somewhere other than `dist/`. The directory is created if it does not exist. |
+The date span is useful for spotting an unexpectedly short series. Validation
+does not check freshness or require an observation in every period; review the
+span and relevant data changes yourself.
 
-!!! warning "`--only` writes a partial dist"
-    Because `build` removes every series file it did not write,
-    `trends build --only sp500-in-gold` into the real `dist/` deletes the other
-    six series' files and writes an index that lists one series. When iterating on a
-    single series, pair `--only` with `--out` pointed at a scratch directory,
-    and run a full `trends build` before committing.
+## Build output
 
-## Refreshing the cache
+```bash
+trends build
+```
 
-A build reads upstream responses from `cache/`, not from the network. The first
-run on a fresh clone fetches everything. After that nothing is refetched until
-you say so:
+The CLI computes and validates every selected series before the emitter writes
+any output. A computation or validation failure leaves the output directory
+unchanged, although source data may already have been cached.
+
+A successful full build currently writes 15 files: two per series plus
+`index.json`. The final line reports the number of files written and the output
+directory. See [Output](output.md) for their contents and how to read them.
+
+| Option | Available on | Behavior |
+| --- | --- | --- |
+| `--only ID [ID ...]` | `check`, `build` | Select the named series. IDs are case-sensitive and processed in sorted order. |
+| `--out DIR` | `build` | Choose the output directory; missing directories are created. |
+
+Omitting `--only` selects every series. A bare `--only` also selects every
+series, because the parser accepts an empty list. Supply all desired IDs after
+one `--only` option, listing each ID once; repeated IDs are not deduplicated.
+
+In an editable checkout, the default output is the repository's `dist/`, even
+when you invoke `trends` from another directory. A relative `--out` path is
+resolved from your current working directory. Both default output and cache paths are derived from the
+installed module's location. Use the documented editable checkout workflow so
+these paths resolve inside the repository.
+
+### Build one series safely
+
+For a quick validation, use `check --only`. To inspect generated files, choose
+a separate output directory:
+
+```bash
+trends build --only sp500-in-gold --out /tmp/market-trends-preview
+```
+
+This writes `index.json`, `series/sp500-in-gold.json`, and
+`series/sp500-in-gold.csv` inside `/tmp/market-trends-preview`.
+
+!!! warning "A build replaces the selected output set"
+    Every build replaces the index with only the selected series, then deletes
+    other `.json` and `.csv` files directly inside the output's `series/`
+    directory. Running `trends build --only sp500-in-gold` without `--out`
+    therefore removes the other series from the default output. Use a directory
+    dedicated to this project's generated files, and run a full build before
+    committing the published dataset.
+
+Validation happens before writing, but writing is not a filesystem transaction.
+A disk error, permissions error, or interrupted process during emission can
+leave partially updated output. Fix the cause and rerun the build.
+
+## Use and refresh the cache
+
+Both `check` and `build` use a fetch-through cache:
+
+- An existing response is reused without a network request.
+- A missing response is downloaded and saved for later runs.
+- Setting `TRENDS_REFRESH=1` bypasses existing entries and saves fresh responses.
+
+Refresh and validate one series without changing published output:
+
+```bash
+TRENDS_REFRESH=1 trends check --only buffett-indicator
+```
+
+Refresh all inputs and regenerate the dataset:
 
 ```bash
 TRENDS_REFRESH=1 trends build
 ```
 
-That refetches every source and overwrites its cached copy. An upstream
-revision then shows up as a git diff in `dist/`, one line per changed
-observation, which is the reason the cache exists. See
-[Sources and licences](sources.md) for what lands where, and why none of it is
-committed.
+The variable must be exactly `1` to enable refresh. These shell commands set it
+for that invocation only. Refresh applies to source requests made by the
+selected builders, so a shared source can be fetched more than once in a full
+run. A failed run can leave some cache entries refreshed and others unchanged.
 
-## Exit codes
+`--out` changes only the output location; it does not isolate or relocate the
+cache. There is no cache-expiration policy or offline flag. To run without
+network access, all required responses must already be cached and refresh must
+be disabled. See [Sources and licences](sources.md) and the repository's
+`cache/README.md` for cache locations and data terms.
 
-| Code | Meaning |
-| --- | --- |
-| `0` | Every series built and validated. For `build`, every file was written. |
-| `1` | A series failed validation. The message starts with `refused to publish:` and names the series and the check. Nothing is written. |
-| `2` | An id passed to `--only` is not in the registry. |
+## Errors and exit codes
 
-An unreachable upstream is not caught. httpx raises, the run ends with a
-traceback that names the URL, and the exit code is non-zero.
+| Exit code | Meaning | Output behavior |
+| --- | --- | --- |
+| `0` | The command succeeded, or help was displayed. | `build` completed its writes and cleanup; `check` wrote no published output. |
+| `1` for a caught validation error | The message starts with `refused to publish:` and identifies the series and failed rule. | No published output is changed. The cache may have changed. |
+| `2` | Invalid arguments, a missing subcommand, or an unknown `--only` ID. Unknown IDs produce `unknown series: ...`. | Rejected before any series is built. |
 
-## A typical session
+Network failures, parsing errors, and filesystem errors are not caught by the
+CLI. They produce a traceback and a nonzero exit status rather than the
+`refused to publish:` message. A nonzero status alone therefore does not imply
+a validation failure.
+
+For a failed download, inspect the exception at the end of the traceback and
+the affected source's URL. For a validation or parsing failure, inspect the
+source or series and its cached response. If you suspect stale or incomplete
+input, refresh the affected series with `check --only` before rebuilding. For
+an unknown ID, use `trends list` to find its exact spelling.
+
+## Review a dataset update
 
 ```bash
-uv run trends check                    # is everything still buildable?
-TRENDS_REFRESH=1 uv run trends build   # pull the latest upstream data, write dist/
-git diff --stat dist/                  # which series moved, and by how many lines?
-git diff dist/series/buffett-indicator.json   # the moved observations, one per line
+trends check
+TRENDS_REFRESH=1 trends build
+git diff --stat -- dist/
+git diff -- dist/series/buffett-indicator.json
+git status --short
 ```
 
-An upstream revision looks like a few changed lines at the recent end of a
-file. A units mistake looks like every line changing. The output format is
-chosen so that the difference is visible at a glance; see [Output](output.md).
+Review changed values and date spans as well as new or removed files. A cached
+rebuild can still change timestamps and source dates; see
+[Build dates and reproducibility](output.md#build-dates-and-reproducibility).
+The Bitcoin files are generated locally but ignored by Git, so they will not
+appear in this diff. Run the [development checks](development.md) before
+committing changes.

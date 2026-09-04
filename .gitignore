@@ -5,6 +5,9 @@ __pycache__/
 *.egg-info/
 .DS_Store
 
+# MkDocs output. The docs site is built and deployed by CI, never committed.
+/site/
+
 # No upstream data is committed. Everything under cache/ is a response this
 # repo knows how to refetch, so it is retrieved rather than vendored: a clone
 # populates it on the first build. Keeping it out means this repo is never the
@@ -16,9 +19,10 @@ cache/restricted/*
 !cache/README.md
 
 # The same rule, one step downstream. btc-in-gold derives from a source that
-# states no open licence, so its computed file is rebuilt by a clone rather
+# states no open licence, so its computed files are rebuilt by a clone rather
 # than shipped in one. dist/index.json still lists it; run `trends build`.
 dist/series/btc-in-gold.json
+dist/series/btc-in-gold.csv
 
 # `dist/` here holds published JSON, not Python build output — but that is where
 # `uv build` and `hatch build` put a wheel by default. Ignore those so a stray

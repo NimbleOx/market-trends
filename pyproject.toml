@@ -12,6 +12,9 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Financial and Insurance Industry",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Office/Business :: Financial :: Investment",
 ]
 dependencies = [
@@ -22,10 +25,12 @@ dependencies = [
 trends = "market_trends.cli:main"
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+docs = ["mkdocs>=1.6,<2", "mkdocs-material>=9.5"]
 
 [project.urls]
 Homepage = "https://www.jameswarrick.com/money/trends/"
+Documentation = "https://nimbleox.github.io/market-trends/"
 Source = "https://github.com/NimbleOx/market-trends"
 Issues = "https://github.com/NimbleOx/market-trends/issues"
 
@@ -35,6 +40,13 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/market_trends"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+# Errors, pyflakes and import order. The formatter is deliberately not enforced.
+select = ["E", "F", "I"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

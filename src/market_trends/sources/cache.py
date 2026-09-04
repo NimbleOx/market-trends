@@ -6,9 +6,11 @@ upstream revision into a git diff rather than a number that changed for no
 visible reason.
 
 Where a response lands depends on whether its source may be redistributed:
-``cache/open`` is committed, ``cache/restricted`` is git-ignored and refetched
-on a fresh clone. That decision belongs to the source module, which is why it is
-a required argument rather than a default.
+``cache/open`` or ``cache/restricted``. Neither is committed, and a fresh clone
+refetches everything. The split still records a decision, and that decision
+governs what may leave this repo downstream, which is why it belongs to the
+source module and is a required argument rather than a default. See
+``cache/README.md``.
 """
 
 from __future__ import annotations
@@ -36,7 +38,9 @@ def fetch(url: str, *, name: str, redistributable: bool, refresh: bool | None = 
     return _fetch(url, name=name, redistributable=redistributable, refresh=refresh).decode("utf-8")
 
 
-def fetch_bytes(url: str, *, name: str, redistributable: bool, refresh: bool | None = None) -> bytes:
+def fetch_bytes(
+    url: str, *, name: str, redistributable: bool, refresh: bool | None = None
+) -> bytes:
     return _fetch(url, name=name, redistributable=redistributable, refresh=refresh)
 
 

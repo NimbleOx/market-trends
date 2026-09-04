@@ -22,8 +22,9 @@ Since neither is committed, the split no longer decides what ships. What it
 still does is force the decision: `redistributable` is a required argument to
 `fetch()`, so you cannot add a source without saying which it is. The point of
 the field is that somebody decided, not that a string exists. It also decides
-what may leave this repo downstream — see `dist/series/btc-in-gold.json`, which
-is derived from a restricted source and so is rebuilt rather than shipped.
+what may leave this repo downstream — see `dist/series/btc-in-gold.json` and
+its CSV, which are derived from a restricted source and so are rebuilt rather
+than shipped.
 
 If you are adding a source, decide which of the two it belongs in before you
 write the fetcher, not after.

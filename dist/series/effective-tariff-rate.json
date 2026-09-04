@@ -12,16 +12,16 @@
       "name": "US Bureau of Economic Analysis, Federal Government Current Tax Receipts: Customs Duties",
       "url": "https://fred.stlouisfed.org/series/B235RC1Q027SBEA",
       "licence": "Public domain (US federal government work)",
-      "retrievedAt": "2026-08-31"
+      "retrievedAt": "2026-09-04"
     },
     {
       "name": "US Census Bureau, Imports of Goods, Balance of Payments Basis",
       "url": "https://fred.stlouisfed.org/series/BOPGIMP",
       "licence": "Public domain (US federal government work)",
-      "retrievedAt": "2026-08-31"
+      "retrievedAt": "2026-09-04"
     }
   ],
-  "generatedAt": "2026-08-31T16:24:09+00:00",
+  "generatedAt": "2026-09-04T20:13:57+00:00",
   "firstDate": "1992-01-01",
   "lastDate": "2026-04-01",
   "observationCount": 138,

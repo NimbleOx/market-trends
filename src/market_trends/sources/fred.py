@@ -23,9 +23,10 @@ PAGE_URL = "https://fred.stlouisfed.org/series/{series_id}"
 
 #: series id -> (human name, licence, redistributable)
 #:
-#: "redistributable" decides whether the raw response is committed to cache/open
-#: or kept in the ignored cache/restricted. US federal statistics are public
-#: domain; index levels generally are not.
+#: "redistributable" decides whether the raw response is filed under cache/open
+#: or cache/restricted. Neither is committed, but the split governs what may
+#: leave this repo downstream. US federal statistics are public domain; index
+#: levels generally are not.
 LICENCES: dict[str, tuple[str, str, bool]] = {
     "GDP": (
         "US Bureau of Economic Analysis, Gross Domestic Product",

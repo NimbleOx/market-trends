@@ -1,0 +1,80 @@
+site_name: market-trends
+site_description: Computes the long-run financial series published at jameswarrick.com
+site_author: James Warrick
+site_url: https://nimbleox.github.io/market-trends/
+
+repo_name: NimbleOx/market-trends
+repo_url: https://github.com/NimbleOx/market-trends
+edit_uri: blob/main/docs/
+
+theme:
+  name: material
+  icon:
+    logo: material/chart-timeline-variant
+  features:
+    - content.action.edit
+    - content.code.copy
+    - navigation.footer
+    - navigation.instant
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.suggest
+    - toc.follow
+  palette:
+    - scheme: default
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+
+nav:
+  - Home: index.md
+  - CLI: cli.md
+  - Series: series.md
+  - Output: output.md
+  - Sources and licences: sources.md
+  - Development: development.md
+  - Contributing: contributing.md
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - tables
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.highlight:
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  # Lets a docs page include a file from the repo root, so CONTRIBUTING.md is
+  # written once and cannot drift from the copy on the site.
+  - pymdownx.snippets:
+      base_path: [!relative $config_dir]
+      check_paths: true
+
+plugins:
+  - search
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/NimbleOx/market-trends
+    - icon: material/web
+      link: https://www.jameswarrick.com/money/trends/
+
+copyright: Copyright &copy; 2026 James Warrick. Code is MIT; each series carries its own data terms.

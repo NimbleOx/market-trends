@@ -101,7 +101,10 @@ def gold_prices() -> tuple[list[Observation], Source]:
         )
 
     return observations, Source(
-        name="Gold price, monthly since 1833 (World Bank and National Mining Association, via datasets/gold-prices)",
+        name=(
+            "Gold price, monthly since 1833 "
+            "(World Bank and National Mining Association, via datasets/gold-prices)"
+        ),
         url=GOLD_PAGE,
         licence=LICENCE,
         retrieved_at=date.today(),

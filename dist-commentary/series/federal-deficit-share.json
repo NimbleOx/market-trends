@@ -12,25 +12,29 @@
       "name": "US Bureau of Economic Analysis, Federal Government Current Receipts",
       "url": "https://fred.stlouisfed.org/series/FGRECPT",
       "licence": "Public domain (US federal government work)",
-      "retrievedAt": "2026-09-04"
+      "retrievedAt": "2026-09-05"
     },
     {
       "name": "US Bureau of Economic Analysis, Federal Government Current Expenditures",
       "url": "https://fred.stlouisfed.org/series/FGEXPND",
       "licence": "Public domain (US federal government work)",
-      "retrievedAt": "2026-09-04"
+      "retrievedAt": "2026-09-05"
     },
     {
       "name": "US Bureau of Economic Analysis, Gross Domestic Product",
       "url": "https://fred.stlouisfed.org/series/GDP",
       "licence": "Public domain (US federal government work)",
-      "retrievedAt": "2026-09-04"
+      "retrievedAt": "2026-09-05"
     }
   ],
-  "generatedAt": "2026-09-04T21:29:42+00:00",
+  "generatedAt": "2026-09-05T18:25:17+00:00",
   "firstDate": "1947-01-01",
   "lastDate": "2026-04-01",
   "observationCount": 318,
+  "window": {
+    "from": "1947-01-01",
+    "to": "2026-04-01"
+  },
   "observations": [
     {"date": "1947-01-01", "value": -1.0277},
     {"date": "1947-04-01", "value": -0.8591},

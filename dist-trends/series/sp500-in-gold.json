@@ -12,16 +12,16 @@
       "name": "Robert J. Shiller, US Stock Markets 1871-Present (via datasets/s-and-p-500)",
       "url": "https://github.com/datasets/s-and-p-500",
       "licence": "ODC-PDDL-1.0",
-      "retrievedAt": "2026-09-04"
+      "retrievedAt": "2026-09-05"
     },
     {
       "name": "Gold price, monthly since 1833 (World Bank and National Mining Association, via datasets/gold-prices)",
       "url": "https://github.com/datasets/gold-prices",
       "licence": "ODC-PDDL-1.0",
-      "retrievedAt": "2026-09-04"
+      "retrievedAt": "2026-09-05"
     }
   ],
-  "generatedAt": "2026-09-04T21:29:42+00:00",
+  "generatedAt": "2026-09-05T18:06:59+00:00",
   "firstDate": "1871-01-01",
   "lastDate": "2026-07-01",
   "observationCount": 1867,

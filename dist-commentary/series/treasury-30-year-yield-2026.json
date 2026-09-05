@@ -6,19 +6,23 @@
   "precision": 2,
   "frequency": "daily",
   "scale": "linear",
-  "description": "Daily 30-year Treasury par yield, January 2–September 3, 2026. Observed dates only; a fixed snapshot for the article.",
+  "description": "Daily 30-year Treasury par yield. Recorded observations within the requested window; missing days are not filled.",
   "sources": [
     {
       "name": "US Treasury",
       "url": "https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?field_tdr_date_value=2026&type=daily_treasury_yield_curve",
       "licence": "Public domain (US federal government work)",
-      "retrievedAt": "2026-09-04"
+      "retrievedAt": "2026-09-05"
     }
   ],
-  "generatedAt": "2026-09-05T01:45:09+00:00",
+  "generatedAt": "2026-09-05T18:25:17+00:00",
   "firstDate": "2026-01-02",
   "lastDate": "2026-09-03",
   "observationCount": 170,
+  "window": {
+    "from": "2026-01-02",
+    "to": "2026-09-03"
+  },
   "observations": [
     {"date": "2026-01-02", "value": 4.86},
     {"date": "2026-01-05", "value": 4.85},

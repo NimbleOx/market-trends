@@ -12,19 +12,23 @@
       "name": "Federal Reserve Board, Financial Accounts of the United States (Z.1)",
       "url": "https://fred.stlouisfed.org/series/NCBEILQ027S",
       "licence": "Public domain (US federal government work)",
-      "retrievedAt": "2026-09-04"
+      "retrievedAt": "2026-09-05"
     },
     {
       "name": "US Bureau of Economic Analysis, Corporate Profits After Tax",
       "url": "https://fred.stlouisfed.org/series/CP",
       "licence": "Public domain (US federal government work)",
-      "retrievedAt": "2026-09-04"
+      "retrievedAt": "2026-09-05"
     }
   ],
-  "generatedAt": "2026-09-04T21:29:42+00:00",
+  "generatedAt": "2026-09-05T18:25:17+00:00",
   "firstDate": "1947-10-01",
   "lastDate": "2026-01-01",
   "observationCount": 302,
+  "window": {
+    "from": "1947-01-01",
+    "to": "2026-04-01"
+  },
   "observations": [
     {"date": "1947-10-01", "value": 4.2366},
     {"date": "1948-10-01", "value": 3.9622},

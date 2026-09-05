@@ -1,7 +1,71 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-05T01:45:09+00:00",
+  "generatedAt": "2026-09-05T18:25:17+00:00",
   "series": [
+    {
+      "id": "corporate-profit-share",
+      "title": "Corporate profits as a share of GDP",
+      "unit": "percent of GDP",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1947-01-01",
+      "lastDate": "2026-04-01",
+      "observationCount": 318,
+      "file": "series/corporate-profit-share.json",
+      "csv": "series/corporate-profit-share.csv",
+      "window": {
+        "from": "1947-01-01",
+        "to": "2026-04-01"
+      }
+    },
+    {
+      "id": "effective-tariff-rate",
+      "title": "The effective tariff rate on goods imports",
+      "unit": "percent of goods imports",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1992-01-01",
+      "lastDate": "2026-04-01",
+      "observationCount": 138,
+      "file": "series/effective-tariff-rate.json",
+      "csv": "series/effective-tariff-rate.csv",
+      "window": {
+        "from": "1992-01-01",
+        "to": "2026-04-01"
+      }
+    },
+    {
+      "id": "federal-deficit-share",
+      "title": "The federal deficit as a share of GDP",
+      "unit": "percent of GDP",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1947-01-01",
+      "lastDate": "2026-04-01",
+      "observationCount": 318,
+      "file": "series/federal-deficit-share.json",
+      "csv": "series/federal-deficit-share.csv",
+      "window": {
+        "from": "1947-01-01",
+        "to": "2026-04-01"
+      }
+    },
+    {
+      "id": "market-value-per-dollar-of-profit",
+      "title": "Market value per dollar of corporate profit",
+      "unit": "dollars of market value per dollar of profit",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1947-10-01",
+      "lastDate": "2026-01-01",
+      "observationCount": 302,
+      "file": "series/market-value-per-dollar-of-profit.json",
+      "csv": "series/market-value-per-dollar-of-profit.csv",
+      "window": {
+        "from": "1947-01-01",
+        "to": "2026-04-01"
+      }
+    },
     {
       "id": "treasury-10-year-yield-2026",
       "title": "10-year Treasury yield",
@@ -12,7 +76,11 @@
       "lastDate": "2026-09-03",
       "observationCount": 170,
       "file": "series/treasury-10-year-yield-2026.json",
-      "csv": "series/treasury-10-year-yield-2026.csv"
+      "csv": "series/treasury-10-year-yield-2026.csv",
+      "window": {
+        "from": "2026-01-02",
+        "to": "2026-09-03"
+      }
     },
     {
       "id": "treasury-30-year-yield-2026",
@@ -24,7 +92,43 @@
       "lastDate": "2026-09-03",
       "observationCount": 170,
       "file": "series/treasury-30-year-yield-2026.json",
-      "csv": "series/treasury-30-year-yield-2026.csv"
+      "csv": "series/treasury-30-year-yield-2026.csv",
+      "window": {
+        "from": "2026-01-02",
+        "to": "2026-09-03"
+      }
+    }
+  ],
+  "collection": "commentary",
+  "articles": [
+    {
+      "id": "analyzing-the-effects-of-tariffs-on-prices-and-inflation",
+      "title": "Analyzing the Effects of Tariffs on Prices and Inflation",
+      "series": [
+        "effective-tariff-rate"
+      ],
+      "trendSeries": []
+    },
+    {
+      "id": "uncle-sam-has-competition",
+      "title": "Uncle Sam Has Competition",
+      "series": [
+        "treasury-10-year-yield-2026",
+        "treasury-30-year-yield-2026"
+      ],
+      "trendSeries": []
+    },
+    {
+      "id": "why-the-buffett-indicator-keeps-rising",
+      "title": "Why the Buffett Indicator Keeps Rising",
+      "series": [
+        "corporate-profit-share",
+        "federal-deficit-share",
+        "market-value-per-dollar-of-profit"
+      ],
+      "trendSeries": [
+        "buffett-indicator"
+      ]
     }
   ]
 }

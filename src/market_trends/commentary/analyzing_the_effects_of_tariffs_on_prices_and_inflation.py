@@ -16,13 +16,13 @@ from __future__ import annotations
 from collections import defaultdict
 from datetime import date
 
-from ..schema import Observation, Series
+from ..schema import DateWindow, Observation, Series, windowed
 from ..sources import fred
 
 ID = "effective-tariff-rate"
 
 
-def build() -> Series:
+def build(window: DateWindow) -> Series:
     duties, duties_source = fred.series("B235RC1Q027SBEA")
     goods, goods_source = fred.series("BOPGIMP")
 
@@ -48,7 +48,7 @@ def build() -> Series:
         if o.date in imports_by_quarter and imports_by_quarter[o.date] > 0
     ]
 
-    return Series(
+    series = Series(
         id=ID,
         title="The effective tariff rate on goods imports",
         unit="percent of goods imports",
@@ -63,3 +63,5 @@ def build() -> Series:
         sources=[duties_source, goods_source],
         observations=observations,
     )
+
+    return windowed(series, window)

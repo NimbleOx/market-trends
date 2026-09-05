@@ -13,13 +13,13 @@ makes a deficit positive and a surplus negative.
 
 from __future__ import annotations
 
-from ..schema import Observation, Series
-from ..sources import fred
+from ...schema import DateWindow, Observation, Series, windowed
+from ...sources import fred
 
 ID = "federal-deficit-share"
 
 
-def build() -> Series:
+def build(window: DateWindow) -> Series:
     receipts, receipts_source = fred.series("FGRECPT")
     expenditures, expenditures_source = fred.series("FGEXPND")
     gdp, gdp_source = fred.series("GDP")
@@ -38,7 +38,7 @@ def build() -> Series:
         if o.date in receipts_by_date and o.date in expenditures_by_date and o.value > 0
     ]
 
-    return Series(
+    series = Series(
         id=ID,
         title="The federal deficit as a share of GDP",
         unit="percent of GDP",
@@ -53,3 +53,5 @@ def build() -> Series:
         sources=[receipts_source, expenditures_source, gdp_source],
         observations=observations,
     )
+
+    return windowed(series, window)

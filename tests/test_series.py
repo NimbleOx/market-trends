@@ -1,16 +1,27 @@
+from datetime import date
+
 import pytest
 
+from market_trends.commentary.registry import BUILDERS as COMMENTARY_BUILDERS
 from market_trends.registry import BUILDERS
-from market_trends.schema import validate
+from market_trends.schema import DateWindow, validate
 from market_trends.sources import cache
+
+ALL_BUILDERS = {**BUILDERS, **COMMENTARY_BUILDERS}
+
+
+def build_series(series_id):
+    if series_id in COMMENTARY_BUILDERS:
+        return COMMENTARY_BUILDERS[series_id](DateWindow(date(2025, 1, 1), date(2026, 9, 3)))
+    return BUILDERS[series_id]()
 
 
 @pytest.mark.network
-@pytest.mark.parametrize("series_id", sorted(BUILDERS))
+@pytest.mark.parametrize("series_id", sorted(ALL_BUILDERS))
 def test_every_published_series_builds_and_validates(series_id):
     # Marked network because a cold cache has to fetch. Run the rest with
     # -m "not network".
-    series = BUILDERS[series_id]()
+    series = build_series(series_id)
     validate(series)
     assert series.observations
 
@@ -48,7 +59,7 @@ def test_sp500_in_gold_hits_the_readings_the_chart_exists_to_show():
 
 
 @pytest.mark.network
-@pytest.mark.parametrize("series_id", sorted(BUILDERS))
+@pytest.mark.parametrize("series_id", sorted(ALL_BUILDERS))
 def test_every_series_builds_from_an_empty_cache(series_id, tmp_path, monkeypatch):
     """Nothing upstream is committed, so a clone must be able to fetch all of it.
 
@@ -61,7 +72,7 @@ def test_every_series_builds_from_an_empty_cache(series_id, tmp_path, monkeypatc
     monkeypatch.setattr(cache, "OPEN", tmp_path / "open")
     monkeypatch.setattr(cache, "RESTRICTED", tmp_path / "restricted")
 
-    series = BUILDERS[series_id]()
+    series = build_series(series_id)
     validate(series)
     assert series.observations
 

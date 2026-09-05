@@ -9,7 +9,7 @@ the contract and its limits.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from datetime import date, datetime, timezone
 
 SCHEMA_VERSION = 1
@@ -40,6 +40,21 @@ class Observation:
     value: float
 
 
+@dataclass(frozen=True)
+class DateWindow:
+    """Inclusive observation-date bounds selected for a data run."""
+
+    start: date
+    end: date
+
+    def __post_init__(self) -> None:
+        if self.start > self.end:
+            raise ValidationError("window start must be on or before its end")
+
+    def to_dict(self) -> dict[str, str]:
+        return {"from": self.start.isoformat(), "to": self.end.isoformat()}
+
+
 @dataclass
 class Series:
     id: str
@@ -55,6 +70,7 @@ class Series:
     #: magnitude is unreadable on a linear one.
     scale: str = "linear"
     observations: list[Observation] = field(default_factory=list)
+    window: DateWindow | None = None
 
     @property
     def first_date(self) -> date:
@@ -96,6 +112,8 @@ def validate(series: Series) -> None:
     seen: set[date] = set()
     previous: date | None = None
     for observation in series.observations:
+        if series.window and not series.window.start <= observation.date <= series.window.end:
+            fail(f"observation {observation.date.isoformat()} is outside the requested window")
         if observation.date in seen:
             fail(f"duplicate date {observation.date.isoformat()}")
         seen.add(observation.date)
@@ -111,6 +129,18 @@ def validate(series: Series) -> None:
             fail(f"non-finite value at {observation.date.isoformat()}")
 
 
+def windowed(series: Series, window: DateWindow) -> Series:
+    """Keep recorded observations within a window, without filling boundary gaps."""
+    validate(series)
+    observations = [o for o in series.observations if window.start <= o.date <= window.end]
+    if len(observations) < 2:
+        raise ValidationError(
+            f"{series.id}: window {window.start} through {window.end} contains "
+            f"{len(observations)} observations; at least two are required"
+        )
+    return replace(series, observations=observations, window=window)
+
+
 def to_dict(series: Series) -> dict:
     """Validate and serialize a series, including a new UTC generation timestamp.
 
@@ -119,7 +149,7 @@ def to_dict(series: Series) -> dict:
     """
     validate(series)
 
-    return {
+    payload = {
         "schemaVersion": SCHEMA_VERSION,
         "id": series.id,
         "title": series.title,
@@ -146,3 +176,6 @@ def to_dict(series: Series) -> dict:
             for observation in series.observations
         ],
     }
+    if series.window is not None:
+        payload["window"] = series.window.to_dict()
+    return payload

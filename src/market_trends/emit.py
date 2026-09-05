@@ -1,4 +1,4 @@
-"""Writing ``dist-trends/``.
+"""Writing trend and commentary output.
 
 The output is vendored into the site and reviewed as a git diff before it goes
 live, so the formatting is chosen for diffs rather than for compactness: one
@@ -18,6 +18,7 @@ from __future__ import annotations
 import json
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Literal
 
 from .schema import SCHEMA_VERSION, Series, to_dict
 
@@ -54,7 +55,11 @@ def _dump_csv(payload: dict) -> str:
     return "date,value\n" + "\n".join(rows) + "\n"
 
 
-def write(series_list: list[Series], out: Path) -> list[Path]:
+def write(
+    series_list: list[Series], out: Path, *,
+    collection: Literal["trends", "commentary"] | None = None,
+    articles: list[dict] | None = None,
+) -> list[Path]:
     """Validate the selected series, then write JSON, CSV, and an index.
 
     Validation failures leave output untouched. File writes and stale-file
@@ -93,10 +98,15 @@ def write(series_list: list[Series], out: Path) -> list[Path]:
                 "observationCount": len(series.observations),
                 "file": f"series/{series.id}.json",
                 "csv": f"series/{series.id}.csv",
+                **({"window": series.window.to_dict()} if series.window is not None else {}),
             }
             for series in sorted(series_list, key=lambda s: s.id)
         ],
     }
+    if collection is not None:
+        index["collection"] = collection
+    if articles is not None:
+        index["articles"] = articles
     index_path = out / "index.json"
     index_path.write_text(json.dumps(index, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     written.append(index_path)

@@ -12,13 +12,13 @@ of the equity numerator exactly.
 
 from __future__ import annotations
 
-from ..schema import Observation, Series
-from ..sources import fred
+from ...schema import DateWindow, Observation, Series, windowed
+from ...sources import fred
 
 ID = "corporate-profit-share"
 
 
-def build() -> Series:
+def build(window: DateWindow) -> Series:
     profits, profits_source = fred.series("CP")
     gdp, gdp_source = fred.series("GDP")
 
@@ -32,7 +32,7 @@ def build() -> Series:
         if o.date in profits_by_date and o.value > 0
     ]
 
-    return Series(
+    series = Series(
         id=ID,
         title="Corporate profits as a share of GDP",
         unit="percent of GDP",
@@ -47,3 +47,5 @@ def build() -> Series:
         sources=[profits_source, gdp_source],
         observations=observations,
     )
+
+    return windowed(series, window)

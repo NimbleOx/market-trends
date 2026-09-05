@@ -11,13 +11,13 @@ The multiple can change through changes in equity value, profits, or both.
 
 from __future__ import annotations
 
-from ..schema import Observation, Series
-from ..sources import fred
+from ...schema import DateWindow, Observation, Series, windowed
+from ...sources import fred
 
 ID = "market-value-per-dollar-of-profit"
 
 
-def build() -> Series:
+def build(window: DateWindow) -> Series:
     equities, equities_source = fred.series("NCBEILQ027S")
     profits, profits_source = fred.series("CP")
 
@@ -30,7 +30,7 @@ def build() -> Series:
         if o.date in equities_by_date and o.value > 0
     ]
 
-    return Series(
+    series = Series(
         id=ID,
         title="Market value per dollar of corporate profit",
         unit="dollars of market value per dollar of profit",
@@ -45,3 +45,5 @@ def build() -> Series:
         sources=[equities_source, profits_source],
         observations=observations,
     )
+
+    return windowed(series, window)

@@ -1,4 +1,4 @@
-"""Writing ``dist/``.
+"""Writing ``dist-trends/``.
 
 The output is vendored into the site and reviewed as a git diff before it goes
 live, so the formatting is chosen for diffs rather than for compactness: one

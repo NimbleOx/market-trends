@@ -18,12 +18,11 @@ cache/restricted/*
 
 # The same rule, one step downstream. btc-in-gold derives from a source that
 # states no open licence, so its computed files are rebuilt by a clone rather
-# than shipped in one. dist/index.json still lists it; run `trends build`.
-dist/series/btc-in-gold.json
-dist/series/btc-in-gold.csv
+# than shipped in one. dist-trends/index.json still lists it; run `trends build`.
+dist-trends/series/btc-in-gold.json
+dist-trends/series/btc-in-gold.csv
 
-# `dist/` here holds published JSON, not Python build output — but that is where
-# `uv build` and `hatch build` put a wheel by default. Ignore those so a stray
-# packaging run cannot get committed alongside the series.
-dist/*.whl
-dist/*.tar.gz
+# Python packaging output. `uv build` and `hatch build` write wheels to dist/,
+# which holds nothing published now that the data lives in dist-trends/ and
+# dist-commentary/, so ignore the directory outright.
+/dist/

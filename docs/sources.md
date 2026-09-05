@@ -27,9 +27,22 @@ references on this page were reviewed on 4 September 2026.
 | FRED [`B235RC1Q027SBEA`](https://fred.stlouisfed.org/series/B235RC1Q027SBEA) | BEA; customs duties | Public domain (US federal government work) | `open/` |
 | FRED [`BOPGIMP`](https://fred.stlouisfed.org/series/BOPGIMP) | Census and BEA; goods imports, balance-of-payments basis | Public domain (US federal government work) | `open/` |
 | [Blockchain.com market price](https://www.blockchain.com/explorer/charts/market-price) | Bitcoin prices | No open licence stated; blockchain.com terms | `restricted/` |
+| [Daily Treasury Par Yield Curve Rates](https://home.treasury.gov/resource-center/data-chart-center/interest-rates/TextView?type=daily_treasury_yield_curve) | US Treasury; daily nominal par yields | Public domain (US federal government work) | `open/` |
 
 ¹ These are the data-package maintainers' declarations. See the limitations
 below, particularly the S&P 500 extension.
+
+## Treasury par yields
+
+The Treasury adapter in `src/market_trends/sources/treasury.py` uses annual CSV
+exports directly, without FRED or an API key. It supports 10- and 30-year
+maturities, selects columns by header, and returns observations in ascending
+date order. Values remain in percent, and missing readings are omitted.
+
+Responses are cached as `cache/open/treasury-par-yields-<year>.csv`. The adapter
+accepts a year and maturity; individual builders define observation windows
+and reference-value checks. Source retrieval is shared infrastructure and does
+not determine which output collection a builder belongs to.
 
 ## FRED data and service access
 
@@ -100,8 +113,8 @@ of a public endpoint nor converting prices into a ratio is a blanket grant
 of redistribution rights.
 
 The raw response goes into `cache/restricted/`. The default output files
-`dist/series/btc-in-gold.json` and `dist/series/btc-in-gold.csv` are also
-git-ignored. A full build still writes them, and the committed `dist/index.json`
+`dist-trends/series/btc-in-gold.json` and `dist-trends/series/btc-in-gold.csv` are also
+git-ignored. A full build still writes them, and the committed `dist-trends/index.json`
 still lists the series even when those files are absent from a fresh clone.
 Output in a custom `--out` directory is not covered by those two ignore rules.
 
@@ -136,7 +149,7 @@ output files:
 trends check
 ```
 
-To fetch again and validate a single series without replacing `dist/`:
+To fetch again and validate a single series without replacing `dist-trends/`:
 
 ```bash
 TRENDS_REFRESH=1 trends check --only corporate-profit-share

@@ -9,6 +9,12 @@ repository contains the calculations and source metadata behind the charts at
 Use the output in a chart, a dataframe, or another application; chart rendering
 lives in the consuming application.
 
+Dated article datasets use a separate catalogue and output directory. Discover
+them with `trends articles list` and generate them with `trends articles build`.
+See [Article series](docs/article-series.md) for the workflow, output contract,
+and how to add a dataset. Ordinary trend builds write `dist-trends/`; article builds
+write `dist-commentary/`.
+
 ## Quick start
 
 You need **Python 3.11 or later**, Git, and
@@ -33,19 +39,19 @@ It needs internet access; the current adapters do not require API keys. Later
 builds reuse the local cache until you request a refresh.
 
 Keep the editable installation (`-e`) and the checkout together. The default
-`cache/` and `dist/` paths are resolved from the source tree, even when you run
+`cache/` and `dist-trends/` paths are resolved from the source tree, even when you run
 `trends` from another directory. See the [CLI reference](docs/cli.md) for custom
 output paths and troubleshooting.
 
 ## Read the output
 
-You can inspect the six series committed under `dist/` immediately after
+You can inspect the six series committed under `dist-trends/` immediately after
 cloning. To generate all seven series locally, run the full build above.
 
 After a successful full build:
 
 ```text
-dist/
+dist-trends/
 ├── index.json                    # Available series and relative file paths
 └── series/
     ├── sp500-in-gold.json         # Metadata, sources, and observations
@@ -59,7 +65,7 @@ For example, run this Python code from the checkout root:
 import json
 from pathlib import Path
 
-series = json.loads(Path("dist/series/sp500-in-gold.json").read_text(encoding="utf-8"))
+series = json.loads(Path("dist-trends/series/sp500-in-gold.json").read_text(encoding="utf-8"))
 print(series["title"], series["unit"])
 print(series["observations"][-1])  # {"date": "YYYY-MM-DD", "value": ...}
 ```
@@ -94,10 +100,10 @@ Run these with the virtual environment active:
 
 ```bash
 trends list                                      # List registered series IDs
-trends check                                     # Compute and validate; leave dist/ untouched
+trends check                                     # Compute and validate; leave dist-trends/ untouched
 trends check --only sp500-in-gold                  # Check one series
 trends build --only sp500-in-gold --out /tmp/trends-preview
-TRENDS_REFRESH=1 trends build                     # Download fresh inputs and rebuild dist/
+TRENDS_REFRESH=1 trends build                     # Download fresh inputs and rebuild dist-trends/
 ```
 
 `check` can download and update cached inputs. It skips writing output files.
@@ -127,6 +133,7 @@ full.
 | --- | --- |
 | [`src/market_trends/sources/`](src/market_trends/sources/) | Fetch and parse upstream responses; attach source metadata. |
 | [`src/market_trends/series/`](src/market_trends/series/) | Join inputs and compute each ratio; module docstrings explain the methodology. |
+| [`src/market_trends/article_series/`](src/market_trends/article_series/) | Build dated article datasets using a separate registry and fixed windows. |
 | [`registry.py`](src/market_trends/registry.py) | Register builders used by the CLI and generic series tests. |
 | [`schema.py`](src/market_trends/schema.py) | Define Python data objects, validation, and the JSON shape. |
 | [`emit.py`](src/market_trends/emit.py) | Write JSON, CSV, and the index; remove stale series files. |
@@ -134,7 +141,8 @@ full.
 | [`cache/`](cache/README.md) | Store downloaded responses locally; raw data files are git-ignored. |
 | [`tests/`](tests/) | Check validation, serialization, and calculations. |
 | [`docs/`](docs/index.md) | Source for the MkDocs documentation site. |
-| [`dist/`](dist/) | Generated data for downstream consumers. |
+| [`dist-trends/`](dist-trends/) | Generated data for downstream consumers. |
+| [`dist-commentary/`](dist-commentary/) | Generated article JSON, CSV, and index, separate from trend output. |
 
 The [development guide](docs/development.md) covers adding a series or source,
 reviewing data changes, running CI checks locally, and previewing the docs.

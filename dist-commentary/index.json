@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-05T01:45:09+00:00",
+  "series": [
+    {
+      "id": "treasury-10-year-yield-2026",
+      "title": "10-year Treasury yield",
+      "unit": "percent",
+      "frequency": "daily",
+      "scale": "linear",
+      "firstDate": "2026-01-02",
+      "lastDate": "2026-09-03",
+      "observationCount": 170,
+      "file": "series/treasury-10-year-yield-2026.json",
+      "csv": "series/treasury-10-year-yield-2026.csv"
+    },
+    {
+      "id": "treasury-30-year-yield-2026",
+      "title": "30-year Treasury yield",
+      "unit": "percent",
+      "frequency": "daily",
+      "scale": "linear",
+      "firstDate": "2026-01-02",
+      "lastDate": "2026-09-03",
+      "observationCount": 170,
+      "file": "series/treasury-30-year-yield-2026.json",
+      "csv": "series/treasury-30-year-yield-2026.csv"
+    }
+  ]
+}

@@ -24,7 +24,7 @@ Activate the environment again whenever you open a new terminal.
 
 The editable install (`-e`) makes changes under `src/` available immediately.
 Use the checkout even if you only want to run the CLI: the application finds
-`cache/` and its default `dist/` relative to the installed source tree. A wheel
+`cache/` and its default `dist-trends/` relative to the installed source tree. A wheel
 installation is not the intended workflow.
 
 The `dev` extra installs pytest and Ruff; the `docs` extra installs MkDocs and
@@ -65,7 +65,7 @@ trends check
 ```
 
 This builds and validates every series. It downloads any missing upstream
-responses into `cache/`, but does not write `dist/`. A fresh clone needs network
+responses into `cache/`, but does not write `dist-trends/`. A fresh clone needs network
 access; the current sources do not require API keys.
 
 ## Find the code you need
@@ -124,7 +124,7 @@ trends build --only buffett-indicator --out /tmp/market-trends-preview
 Replace `/tmp/market-trends-preview` with a temporary directory appropriate for
 your system. A build replaces the selected output directory's index and
 removes other JSON and CSV files from its `series/` subdirectory. Running
-`--only` against the default `dist/` therefore removes the unselected series'
+`--only` against the default `dist-trends/` therefore removes the unselected series'
 files. See [CLI reference](cli.md) for details.
 
 ### Review generated data
@@ -133,7 +133,7 @@ When the change is ready, rebuild the complete output:
 
 ```bash
 trends build
-git diff -- dist/
+git diff -- dist-trends/
 git status --short
 ```
 
@@ -189,6 +189,11 @@ example, repeats annual averages across months before 1960.
 
 ## Add a source in a fork
 
+For a dated article dataset, use `src/market_trends/article_series/` and its
+own registry instead of the maintained trend registry. The same source and
+validation conventions below apply. See [Article series](article-series.md)
+for fixed-window builders, reference-value tests, and output separation.
+
 1. **Record the terms before writing the adapter.** Identify the publisher,
    the exact dataset, and the terms that apply to its components and your
    intended use. Record the decision in `Source.licence` and explain relevant
@@ -214,7 +219,7 @@ example, repeats annual averages across months before 1960.
 5. **Apply output restrictions explicitly.** The `redistributable` flag only
    selects `cache/open/` or `cache/restricted/`; it does not prevent the CLI
    from writing or publishing a derived series. For each restricted output,
-   add its JSON and CSV paths under `dist/series/` to `.gitignore`, and check
+   add its JSON and CSV paths under `dist-trends/series/` to `.gitignore`, and check
    any downstream publishing workflow separately. The existing
    `btc-in-gold` entries show the pattern. `.gitignore` does not untrack files
    already committed or protect output written with `--out` elsewhere.

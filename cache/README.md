@@ -24,7 +24,7 @@ TRENDS_REFRESH=1 trends check --only corporate-profit-share
 
 | Directory | Current routing decision |
 | --- | --- |
-| `open/` | Sources the adapters mark `redistributable=True`: the two `datasets` packages and the configured FRED inputs |
+| `open/` | Sources the adapters mark `redistributable=True`: the two `datasets` packages, configured FRED inputs, and Treasury par yields |
 | `restricted/` | Sources marked `redistributable=False`: blockchain.com Bitcoin prices |
 
 Raw responses in both directories are git-ignored. The tracked `.gitkeep`
@@ -37,7 +37,7 @@ from being written or distributed. In particular, the S&P package's declared
 PDDL licence has underlying-source qualifications. See
 [Sources and licences](../docs/sources.md) before deciding what to publish.
 
-The default Bitcoin output paths in `dist/series/` are separately git-ignored.
+The default Bitcoin output paths in `dist-trends/series/` are separately git-ignored.
 Those rules do not cover custom output directories, archives, or uploads.
 
 ## What the cache preserves

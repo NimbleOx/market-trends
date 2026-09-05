@@ -6,6 +6,9 @@ metadata. A build writes `series/<id>.json` and `series/<id>.csv` under the
 output directory. See [Output](output.md) for the file format and
 [Sources and licences](sources.md) for reuse terms.
 
+This catalogue contains the maintained trend series. Dated article datasets
+have a [separate registry, commands, and output](article-series.md).
+
 | ID | Measures | Frequency | History starts¹ | Scale |
 | --- | --- | --- | --- | --- |
 | [`sp500-in-gold`](#sp500-in-gold) | S&P Composite index relative to gold | monthly | 1871-01 | linear |

@@ -14,7 +14,7 @@ from datetime import date, datetime, timezone
 
 SCHEMA_VERSION = 1
 
-FREQUENCIES = ("monthly", "quarterly", "annual")
+FREQUENCIES = ("daily", "monthly", "quarterly", "annual")
 SCALES = ("linear", "log")
 
 

@@ -8,7 +8,7 @@ If you use uv, you can prefix commands with `uv run`, such as `uv run trends lis
 | Command | Purpose | Side effects |
 | --- | --- | --- |
 | `trends list` | Print the available series IDs. | No data fetches or output writes. |
-| `trends check` | Compute and validate every series. | May download and cache missing source data. Does not write `dist/`. |
+| `trends check` | Compute and validate every series. | May download and cache missing source data. Does not write `dist-trends/`. |
 | `trends build` | Compute, validate, and write every series. | May update the cache. Replaces the output index and series files, and removes stale series files. |
 
 ```text
@@ -19,6 +19,22 @@ trends build [--only [ID ...]] [--out DIR]
 
 Run `trends --help` for command names, or `trends build --help`
 for a command's options.
+
+## Article commands
+
+Use the `articles` group for dated article datasets:
+
+```text
+trends articles list
+trends articles check [--only [ID ...]]
+trends articles build [--only [ID ...]] [--out DIR]
+```
+
+These commands use `src/market_trends/article_series/registry.py` and default
+to `dist-commentary/`. The ordinary commands continue to use the trend registry
+and `dist-trends/`. IDs are resolved only within the selected collection; neither
+build includes the other collection. See [Article series](article-series.md)
+for output separation, dataset registration, and downstream use.
 
 ## List series
 
@@ -38,8 +54,8 @@ market-value-per-dollar-of-profit
 sp500-in-gold
 ```
 
-All commands use the same registry in `src/market_trends/registry.py`. Use these
-IDs with `--only`; they also identify the JSON and CSV files under `dist/series/`.
+The ordinary commands use `src/market_trends/registry.py`. Use these
+IDs with `--only`; they also identify the JSON and CSV files under `dist-trends/series/`.
 See [Series](series.md) for definitions and formulas.
 
 ## Check data without writing output
@@ -88,7 +104,7 @@ Omitting `--only` selects every series. A bare `--only` also selects every
 series, because the parser accepts an empty list. Supply all desired IDs after
 one `--only` option, listing each ID once; repeated IDs are not deduplicated.
 
-In an editable checkout, the default output is the repository's `dist/`, even
+In an editable checkout, the default output is the repository's `dist-trends/`, even
 when you invoke `trends` from another directory. A relative `--out` path is
 resolved from your current working directory. Both default output and cache paths are derived from the
 installed module's location. Use the documented editable checkout workflow so
@@ -173,8 +189,8 @@ an unknown ID, use `trends list` to find its exact spelling.
 ```bash
 trends check
 TRENDS_REFRESH=1 trends build
-git diff --stat -- dist/
-git diff -- dist/series/buffett-indicator.json
+git diff --stat -- dist-trends/
+git diff -- dist-trends/series/buffett-indicator.json
 git status --short
 ```
 

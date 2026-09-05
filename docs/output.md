@@ -5,7 +5,7 @@ Use the index to discover files, the series JSON for metadata and provenance,
 and the CSV for loading observations into analysis tools.
 
 ```text
-dist/
+dist-trends/
 ├── index.json
 └── series/
     ├── buffett-indicator.json
@@ -13,10 +13,14 @@ dist/
     └── ...
 ```
 
-Paths below are relative to the output directory, which defaults to `dist/` in
+Paths below are relative to the output directory, which defaults to `dist-trends/` in
 an editable checkout. `trends build --out DIR` produces the same layout in
 `DIR`. A build with `--only` produces a partial dataset and removes unselected
 series files from that output; see [CLI](cli.md#build-one-series-safely).
+
+`trends articles build` uses the same schema and file layout under a separate
+`dist-commentary/` root. Its index contains article series only. See
+[Article series](article-series.md) for the workflow and collection boundaries.
 
 ## Read a series
 
@@ -27,7 +31,7 @@ series without installing an analysis package:
 import json
 from pathlib import Path
 
-root = Path("dist")
+root = Path("dist-trends")
 index = json.loads((root / "index.json").read_text(encoding="utf-8"))
 if index["schemaVersion"] != 1:
     raise ValueError("Unsupported index schema")
@@ -124,7 +128,7 @@ source; it is not one of the published series:
 | `title` | string | Human-readable heading. |
 | `unit` | string | Unit shared by all observation values. |
 | `precision` | integer | Suggested decimal places for display. It does not control stored precision. |
-| `frequency` | string | Declared frequency: `monthly`, `quarterly`, or `annual`. Does not guarantee a gap-free sequence. |
+| `frequency` | string | Declared frequency: `daily`, `monthly`, `quarterly`, or `annual`. Does not guarantee a gap-free sequence. |
 | `scale` | string | Suggested axis scale: `linear` or `log`. Log series contain only positive values. |
 | `description` | string | Explanation of what the series measures. |
 | `sources` | array of objects | Provenance records with `name`, `url`, `licence`, and `retrievedAt`. |
@@ -133,10 +137,15 @@ source; it is not one of the published series:
 | `observationCount` | integer | Number of elements in `observations`. |
 | `observations` | array of objects | Each has a `date` (`YYYY-MM-DD`) and a finite numeric `value`, in strictly ascending date order. |
 
-Dates label observation periods, not release dates or fetch times. Current
-builders use the first day of the month or quarter. Follow each
+Dates label observation periods, not release dates or fetch times. Maintained
+trend builders use the first day of the month or quarter. Follow each
 [series definition](series.md) when interpreting a period; do not treat a
 quarterly value as a measurement taken on that single day.
+
+Daily article series preserve the source's observation date. Weekends, holidays,
+and missing readings are not filled in; `daily` does not mean one row per
+calendar day. Follow the individual builder's definition when interpreting
+coverage and missing observations.
 
 ### Numeric precision
 
@@ -182,7 +191,7 @@ Read a local CSV with the standard library:
 import csv
 from pathlib import Path
 
-path = Path("dist/series/buffett-indicator.csv")
+path = Path("dist-trends/series/buffett-indicator.csv")
 with path.open(encoding="utf-8", newline="") as stream:
     observations = [(row["date"], float(row["value"])) for row in csv.DictReader(stream)]
 ```
@@ -193,7 +202,7 @@ If pandas is installed in your analysis environment, use:
 import pandas as pd
 
 buffett_indicator = pd.read_csv(
-    "dist/series/buffett-indicator.csv",
+    "dist-trends/series/buffett-indicator.csv",
     parse_dates=["date"],
     index_col="date",
 )

@@ -42,6 +42,7 @@ nav:
   - Home: index.md
   - CLI reference: cli.md
   - Series: series.md
+  - Article series: article-series.md
   - Output reference: output.md
   - Sources and licences: sources.md
   - Development: development.md

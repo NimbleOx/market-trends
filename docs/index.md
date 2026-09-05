@@ -25,7 +25,7 @@ trends build
 
 The first build needs internet access to download its inputs. The current
 source adapters do not require API keys. A successful full build produces
-`dist/index.json` and one JSON and CSV file for each of the seven series.
+`dist-trends/index.json` and one JSON and CSV file for each of the seven series.
 JSON includes observations, chart metadata, and sources; CSV contains
 `date,value` rows. Chart rendering belongs to the consuming application.
 
@@ -39,10 +39,14 @@ TRENDS_REFRESH=1 trends build
 
 ## Choose your next step
 
+Dated article datasets are a separate collection: `trends articles build`
+writes `dist-commentary/` and leaves the maintained trends in `dist-trends/` unchanged.
+
 | I want to… | Read |
 | --- | --- |
 | Run a command, check one series, or resolve an error | [CLI reference](cli.md) |
 | Understand a formula, input, or historical limitation | [Series](series.md) |
+| Build, consume, or add a dated article dataset | [Article series](article-series.md) |
 | Load the JSON or CSV into an application | [Output reference](output.md) |
 | Inspect provenance, cache behavior, and data terms | [Sources and licences](sources.md) |
 | Change the code, run checks, or preview these docs | [Development](development.md) |
@@ -51,7 +55,7 @@ TRENDS_REFRESH=1 trends build
 ## Before you build or consume data
 
 - **Partial builds replace the selected output set.** Pair `--only` with
-  `--out /tmp/trends-preview` to avoid removing other series from `dist/`.
+  `--out /tmp/trends-preview` to avoid removing other series from `dist-trends/`.
   See [partial builds](cli.md#build-one-series-safely).
 - **Checks can write to the cache.** `trends check` computes and validates
   without changing generated output. It can still download missing inputs.

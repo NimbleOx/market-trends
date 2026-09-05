@@ -3,14 +3,16 @@
 [![ci](https://github.com/NimbleOx/market-trends/actions/workflows/ci.yml/badge.svg)](https://github.com/NimbleOx/market-trends/actions/workflows/ci.yml)
 [![docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://nimbleox.github.io/market-trends/)
 
-Build seven historical financial and economic ratios as JSON and CSV. This
+Build maintained market trends and commentary datasets as JSON and CSV. This
 repository contains the calculations and source metadata behind the charts at
-[jameswarrick.com/money/trends/](https://www.jameswarrick.com/money/trends/).
+[jameswarrick.com/markets/](https://www.jameswarrick.com/markets/).
 Use the output in a chart, a dataframe, or another application; chart rendering
 lives in the consuming application.
 
-Dated article datasets use a separate catalogue and output directory. Discover
-them with `trends articles list` and generate them with `trends articles build`.
+Commentary datasets are grouped by article in a separate catalogue. Discover
+them with `trends articles groups` and generate them with `trends articles build`.
+Each article has fixed default dates in this project, with optional `--from` and
+`--to` overrides.
 See [Article series](docs/article-series.md) for the workflow, output contract,
 and how to add a dataset. Ordinary trend builds write `dist-trends/`; article builds
 write `dist-commentary/`.
@@ -33,8 +35,8 @@ trends list
 trends build
 ```
 
-The first build downloads the upstream data, computes and validates every
-series, and writes **15 files**: seven JSON files, seven CSV files, and an index.
+The first build downloads the upstream data, computes and validates the three
+maintained trends, and writes **7 files**: three JSON files, three CSV files, and an index.
 It needs internet access; the current adapters do not require API keys. Later
 builds reuse the local cache until you request a refresh.
 
@@ -45,8 +47,8 @@ output paths and troubleshooting.
 
 ## Read the output
 
-You can inspect the six series committed under `dist-trends/` immediately after
-cloning. To generate all seven series locally, run the full build above.
+You can inspect the two trend series committed under `dist-trends/` immediately after
+cloning. To generate all three trend series locally, run the full build above.
 
 After a successful full build:
 
@@ -56,7 +58,7 @@ dist-trends/
 └── series/
     ├── sp500-in-gold.json         # Metadata, sources, and observations
     ├── sp500-in-gold.csv          # date,value rows
-    └── ...                       # The other six series, in both formats
+    └── ...                       # The other two trend series, in both formats
 ```
 
 For example, run this Python code from the checkout root:
@@ -74,25 +76,45 @@ The [output reference](docs/output.md) documents every field, date conventions,
 timestamps, and CSV loading. Keep each CSV with its JSON: source and licence
 metadata appear only in the JSON.
 
-The repository includes generated files for six series. Bitcoin output is
-git-ignored under the project's data policy, so a fresh clone's index can refer
+The repository includes generated files for two trend series and all six
+commentary datasets. Bitcoin output is git-ignored under the project's data
+policy, so a fresh clone's index can refer
 to missing Bitcoin files until you run a full build.
 
-## Available series
+## Maintained trends
 
 | ID | Measure | Frequency | History begins |
 | --- | --- | --- | --- |
 | `sp500-in-gold` | S&P Composite index divided by the gold price | Monthly | 1871 |
 | `btc-in-gold` | Bitcoin price divided by the gold price | Monthly | 2010 |
 | `buffett-indicator` | Nonfinancial corporate equity value as a percentage of GDP | Quarterly | 1947 |
-| `corporate-profit-share` | After-tax corporate profits as a percentage of GDP | Quarterly | 1947 |
-| `market-value-per-dollar-of-profit` | Nonfinancial corporate equity value divided by after-tax profits | Quarterly | 1947 |
-| `federal-deficit-share` | Federal current expenditures minus receipts, as a percentage of GDP | Quarterly | 1947 |
-| `effective-tariff-rate` | Customs duties as a percentage of goods imports | Quarterly | 1992 |
 
 See [Series](docs/series.md) for formulas, units, joins, rounding, and limitations.
 In particular, gold prices before 1960 repeat annual averages in monthly rows;
 the monthly output does not imply monthly gold price detail for that period.
+
+## Commentary groups
+
+| Article | Commentary datasets | Shared trend |
+| --- | --- | --- |
+| Analyzing the Effects of Tariffs on Prices and Inflation | `effective-tariff-rate` | — |
+| Uncle Sam Has Competition | `treasury-10-year-yield-2026`, `treasury-30-year-yield-2026` | — |
+| Why the Buffett Indicator Keeps Rising | `corporate-profit-share`, `federal-deficit-share`, `market-value-per-dollar-of-profit` | `buffett-indicator` |
+
+```bash
+trends articles groups
+trends articles check --article why-the-buffett-indicator-keeps-rising
+trends articles build
+```
+
+The commentary index records these groups. Shared trends remain in
+`dist-trends/`; commentary builds do not duplicate them. Default inclusive windows
+are hard-coded per article in `src/market_trends/commentary/registry.py` and shown
+by `trends articles groups`. Override either bound with `--from YYYY-MM-DD` or
+`--to YYYY-MM-DD`; omitted bounds retain that article's defaults. Treasury
+builds fetch each calendar year in the window; quarterly ratios are calculated
+before filtering observations by their period dates. See [Article series](docs/article-series.md) for selecting groups,
+importing both collections, and migrating from the former mixed trend output.
 
 ## Common commands
 
@@ -132,8 +154,8 @@ full.
 | Path | Responsibility |
 | --- | --- |
 | [`src/market_trends/sources/`](src/market_trends/sources/) | Fetch and parse upstream responses; attach source metadata. |
-| [`src/market_trends/series/`](src/market_trends/series/) | Join inputs and compute each ratio; module docstrings explain the methodology. |
-| [`src/market_trends/article_series/`](src/market_trends/article_series/) | Build dated article datasets using a separate registry and fixed windows. |
+| [`src/market_trends/trends/`](src/market_trends/trends/) | Join inputs and compute maintained trends; module docstrings explain the methodology. |
+| [`src/market_trends/commentary/`](src/market_trends/commentary/) | Build commentary datasets grouped by article, with fixed default date windows and optional overrides. |
 | [`registry.py`](src/market_trends/registry.py) | Register builders used by the CLI and generic series tests. |
 | [`schema.py`](src/market_trends/schema.py) | Define Python data objects, validation, and the JSON shape. |
 | [`emit.py`](src/market_trends/emit.py) | Write JSON, CSV, and the index; remove stale series files. |

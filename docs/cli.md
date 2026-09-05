@@ -8,8 +8,8 @@ If you use uv, you can prefix commands with `uv run`, such as `uv run trends lis
 | Command | Purpose | Side effects |
 | --- | --- | --- |
 | `trends list` | Print the available series IDs. | No data fetches or output writes. |
-| `trends check` | Compute and validate every series. | May download and cache missing source data. Does not write `dist-trends/`. |
-| `trends build` | Compute, validate, and write every series. | May update the cache. Replaces the output index and series files, and removes stale series files. |
+| `trends check` | Compute and validate every maintained trend series. | May download and cache missing source data. Does not write `dist-trends/`. |
+| `trends build` | Compute, validate, and write every maintained trend series. | May update the cache. Replaces the output index and series files, and removes stale series files. |
 
 ```text
 trends list
@@ -22,19 +22,27 @@ for a command's options.
 
 ## Article commands
 
-Use the `articles` group for dated article datasets:
+Use the `articles` group for commentary datasets:
 
 ```text
 trends articles list
-trends articles check [--only [ID ...]]
-trends articles build [--only [ID ...]] [--out DIR]
+trends articles groups
+trends articles check [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--only [ID ...] | --article SLUG]
+trends articles build [--from YYYY-MM-DD] [--to YYYY-MM-DD] [--only [ID ...] | --article SLUG] [--out DIR]
 ```
 
-These commands use `src/market_trends/article_series/registry.py` and default
+These commands use `src/market_trends/commentary/registry.py` and default
 to `dist-commentary/`. The ordinary commands continue to use the trend registry
 and `dist-trends/`. IDs are resolved only within the selected collection; neither
-build includes the other collection. See [Article series](article-series.md)
-for output separation, dataset registration, and downstream use.
+build includes the other collection. `groups` lists article slugs, default date
+windows, owned datasets, and shared trend references. `--article SLUG` selects the datasets owned by one
+article; it cannot be combined with `--only`. Shared trends are built separately
+with `trends build`. See [Article series](article-series.md)
+for date-window semantics, output separation, dataset registration, and downstream use.
+Article checks and builds use the fixed dates configured per article in the
+registry. Either date flag overrides its bound for all selected articles;
+omitted bounds keep each article's default. Maintained trend commands continue
+to build their full histories.
 
 ## List series
 
@@ -47,10 +55,6 @@ The output is one ID per line, sorted alphabetically:
 ```text
 btc-in-gold
 buffett-indicator
-corporate-profit-share
-effective-tariff-rate
-federal-deficit-share
-market-value-per-dollar-of-profit
 sp500-in-gold
 ```
 
@@ -62,7 +66,7 @@ See [Series](series.md) for definitions and formulas.
 
 ```bash
 trends check
-trends check --only buffett-indicator corporate-profit-share
+trends check --only buffett-indicator sp500-in-gold
 ```
 
 `check` computes and validates each selected series in ID order. For each one,
@@ -91,18 +95,21 @@ The CLI computes and validates every selected series before the emitter writes
 any output. A computation or validation failure leaves the output directory
 unchanged, although source data may already have been cached.
 
-A successful full build currently writes 15 files: two per series plus
+A successful full build currently writes 7 files: two per series plus
 `index.json`. The final line reports the number of files written and the output
 directory. See [Output](output.md) for their contents and how to read them.
 
 | Option | Available on | Behavior |
 | --- | --- | --- |
 | `--only ID [ID ...]` | `check`, `build` | Select the named series. IDs are case-sensitive and processed in sorted order. |
+| `--from DATE`, `--to DATE` | `articles check`, `articles build` | Optional inclusive observation-date overrides in `YYYY-MM-DD` form; omitted bounds retain each article's configured defaults. |
+| `--article SLUG` | `articles check`, `articles build` | Select one article's commentary datasets; mutually exclusive with `--only`. |
 | `--out DIR` | `build` | Choose the output directory; missing directories are created. |
 
-Omitting `--only` selects every series. A bare `--only` also selects every
-series, because the parser accepts an empty list. Supply all desired IDs after
-one `--only` option, listing each ID once; repeated IDs are not deduplicated.
+Without `--article`, omitting `--only` selects every series in the chosen
+catalogue. A bare `--only` also selects every series, because the parser accepts
+an empty list. Supply all desired IDs after one `--only` option, listing each ID
+once; repeated IDs are not deduplicated.
 
 In an editable checkout, the default output is the repository's `dist-trends/`, even
 when you invoke `trends` from another directory. A relative `--out` path is
@@ -171,7 +178,7 @@ be disabled. See [Sources and licences](sources.md) and the repository's
 | --- | --- | --- |
 | `0` | The command succeeded, or help was displayed. | `build` completed its writes and cleanup; `check` wrote no published output. |
 | `1` for a caught validation error | The message starts with `refused to publish:` and identifies the series and failed rule. | No published output is changed. The cache may have changed. |
-| `2` | Invalid arguments, a missing subcommand, or an unknown `--only` ID. Unknown IDs produce `unknown series: ...`. | Rejected before any series is built. |
+| `2` | Invalid arguments, a missing subcommand, or an unknown series ID or article slug. Unknown IDs produce `unknown series: ...`. | Rejected before any series is built. |
 
 Network failures, parsing errors, and filesystem errors are not caught by the
 CLI. They produce a traceback and a nonzero exit status rather than the

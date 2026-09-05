@@ -76,7 +76,8 @@ series → validation → JSON and CSV**.
 | Change | Start here |
 | --- | --- |
 | Read or replace an upstream feed | `src/market_trends/sources/` |
-| Change a formula, join, or aggregation | `src/market_trends/series/` |
+| Change a maintained trend formula | `src/market_trends/trends/` |
+| Change a commentary formula or article group | `src/market_trends/commentary/` |
 | Make a series available to the CLI | `src/market_trends/registry.py` |
 | Change the data model or validation | `src/market_trends/schema.py` |
 | Change the output format or file handling | `src/market_trends/emit.py` |
@@ -156,7 +157,7 @@ see [Sources and licences](sources.md).
 
 ## Add a series in a fork
 
-1. Create `src/market_trends/series/<name>.py` with a unique, lowercase,
+1. Create `src/market_trends/trends/<name>.py` with a unique, lowercase,
    hyphenated `ID` and a zero-argument `build() -> Series` function. Start from
    `buffett_indicator.py` for a quarterly ratio or `sp500_in_gold.py` for a
    monthly ratio.
@@ -189,10 +190,10 @@ example, repeats annual averages across months before 1960.
 
 ## Add a source in a fork
 
-For a dated article dataset, use `src/market_trends/article_series/` and its
+For a commentary dataset, use `src/market_trends/commentary/` and its
 own registry instead of the maintained trend registry. The same source and
 validation conventions below apply. See [Article series](article-series.md)
-for fixed-window builders, reference-value tests, and output separation.
+for article grouping, shared trend references, reference-value tests, and output separation.
 
 1. **Record the terms before writing the adapter.** Identify the publisher,
    the exact dataset, and the terms that apply to its components and your

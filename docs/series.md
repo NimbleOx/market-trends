@@ -1,27 +1,31 @@
 # Series
 
-The registry contains seven series. Each builder joins upstream observations,
-computes a ratio, and returns a `Series` with its source records and display
-metadata. A build writes `series/<id>.json` and `series/<id>.csv` under the
-output directory. See [Output](output.md) for the file format and
+This page documents three maintained trends and four commentary ratios.
+Each builder joins upstream observations, computes a ratio, and returns a
+`Series` with its source records and display metadata. A build writes
+`series/<id>.json` and `series/<id>.csv` under the output directory.
+See [Output](output.md) for the file format and
 [Sources and licences](sources.md) for reuse terms.
 
-This catalogue contains the maintained trend series. Dated article datasets
-have a [separate registry, commands, and output](article-series.md).
+The trend registry contains `sp500-in-gold`, `btc-in-gold`, and
+`buffett-indicator`. The other four ratios belong to commentary article groups
+and are emitted under `dist-commentary/`. The daily Treasury commentary pair
+is documented with its [article group](article-series.md#commentary-groups).
 
-| ID | Measures | Frequency | History starts¹ | Scale |
-| --- | --- | --- | --- | --- |
-| [`sp500-in-gold`](#sp500-in-gold) | S&P Composite index relative to gold | monthly | 1871-01 | linear |
-| [`btc-in-gold`](#btc-in-gold) | Gold equivalent of one bitcoin | monthly | 2010-09 | log |
-| [`buffett-indicator`](#buffett-indicator) | Nonfinancial corporate equity value / GDP | quarterly | 1947 Q4 | linear |
-| [`corporate-profit-share`](#corporate-profit-share) | After-tax corporate profits / GDP | quarterly | 1947 Q1 | linear |
-| [`market-value-per-dollar-of-profit`](#market-value-per-dollar-of-profit) | Nonfinancial corporate equity value / after-tax profits | quarterly | 1947 Q4 | linear |
-| [`federal-deficit-share`](#federal-deficit-share) | Federal current expenditures minus receipts / GDP | quarterly | 1947 Q1 | linear |
-| [`effective-tariff-rate`](#effective-tariff-rate) | Customs duties / goods imports | quarterly | 1992 Q1 | linear |
+| ID | Measures | Frequency | History starts¹ | Scale | Catalogue |
+| --- | --- | --- | --- | --- | --- |
+| [`sp500-in-gold`](#sp500-in-gold) | S&P Composite index relative to gold | monthly | 1871-01 | linear | Trends |
+| [`btc-in-gold`](#btc-in-gold) | Gold equivalent of one bitcoin | monthly | 2010-09 | log | Trends |
+| [`buffett-indicator`](#buffett-indicator) | Nonfinancial corporate equity value / GDP | quarterly | 1947 Q4 | linear | Trends |
+| [`corporate-profit-share`](#corporate-profit-share) | After-tax corporate profits / GDP | quarterly | 1947 Q1 | linear | Commentary |
+| [`market-value-per-dollar-of-profit`](#market-value-per-dollar-of-profit) | Nonfinancial corporate equity value / after-tax profits | quarterly | 1947 Q4 | linear | Commentary |
+| [`federal-deficit-share`](#federal-deficit-share) | Federal current expenditures minus receipts / GDP | quarterly | 1947 Q1 | linear | Commentary |
+| [`effective-tariff-rate`](#effective-tariff-rate) | Customs duties / goods imports | quarterly | 1992 Q1 | linear | Commentary |
 
-¹ Start dates reflect the checked-in index. A build uses the dates available in
-its inputs; it does not hardcode these boundaries. Read `firstDate`, `lastDate`,
-and `observationCount` from the generated JSON for the actual coverage.
+¹ Start dates reflect the checked-in indexes. Maintained trends use the history
+available in their inputs; commentary datasets select observations within their
+configured or overridden date windows. Read `firstDate`, `lastDate`, and
+`observationCount` from the generated JSON for the actual coverage.
 
 ## sp500-in-gold
 
@@ -51,7 +55,7 @@ decimal places; `precision: 2` requests two decimal places for display.
 The published `unit` is `ounces of gold`, with the index-level interpretation
 above.
 
-Implementation: [src/market_trends/series/sp500_in_gold.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/sp500_in_gold.py).
+Implementation: [src/market_trends/trends/sp500_in_gold.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/sp500_in_gold.py).
 
 ## btc-in-gold
 
@@ -76,7 +80,7 @@ The generated Bitcoin JSON and CSV are git-ignored because the source has no
 open licence recorded. A full build still writes them locally. See
 [Bitcoin data](sources.md#bitcoin-data) before distributing them.
 
-Implementation: [src/market_trends/series/btc_in_gold.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/btc_in_gold.py).
+Implementation: [src/market_trends/trends/btc_in_gold.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/btc_in_gold.py).
 
 ## buffett-indicator
 
@@ -99,7 +103,7 @@ assumed identical to another chart labelled “Buffett indicator.” The
 [Federal Reserve's series breakdown](https://www.federalreserve.gov/apps/fof/SeriesAnalyzer.aspx?s=FL103164105&t=)
 describes the equity components.
 
-Implementation: [src/market_trends/series/buffett_indicator.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/buffett_indicator.py).
+Implementation: [src/market_trends/trends/buffett_indicator.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/buffett_indicator.py).
 
 ## corporate-profit-share
 
@@ -118,7 +122,7 @@ coverage is broader than the nonfinancial equity numerator used by the
 Buffett indicator; the identity is algebraic, not a claim that their sectors
 match exactly.
 
-Implementation: [src/market_trends/series/corporate_profit_share.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/corporate_profit_share.py).
+Implementation: [src/market_trends/commentary/why_the_buffett_indicator_keeps_rising/corporate_profit_share.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/commentary/why_the_buffett_indicator_keeps_rising/corporate_profit_share.py).
 
 ## market-value-per-dollar-of-profit
 
@@ -142,7 +146,7 @@ so no additional factor of 100 is needed in this expression. Independently
 refreshed inputs can break the comparison; use the same cached responses for
 all three builders.
 
-Implementation: [src/market_trends/series/market_value_per_dollar_of_profit.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/market_value_per_dollar_of_profit.py).
+Implementation: [src/market_trends/commentary/why_the_buffett_indicator_keeps_rising/market_value_per_dollar_of_profit.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/commentary/why_the_buffett_indicator_keeps_rising/market_value_per_dollar_of_profit.py).
 
 ## federal-deficit-share
 
@@ -162,7 +166,7 @@ The comparison does not establish that a change in the federal deficit caused
 an equal change in corporate profits. A quarterly annual-rate ratio can also
 differ substantially from the deficit measured across a full fiscal year.
 
-Implementation: [src/market_trends/series/federal_deficit_share.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/federal_deficit_share.py).
+Implementation: [src/market_trends/commentary/why_the_buffett_indicator_keeps_rising/federal_deficit_share.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/commentary/why_the_buffett_indicator_keeps_rising/federal_deficit_share.py).
 
 ## effective-tariff-rate
 
@@ -186,7 +190,7 @@ This is an aggregate collections-to-imports ratio. Product mix, exemptions,
 timing, and sourcing changes can make it differ from announced tariff rates;
 it is not the rate charged on every shipment.
 
-Implementation: [src/market_trends/series/effective_tariff_rate.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/series/effective_tariff_rate.py).
+Implementation: [src/market_trends/commentary/analyzing_the_effects_of_tariffs_on_prices_and_inflation.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/commentary/analyzing_the_effects_of_tariffs_on_prices_and_inflation.py).
 
 ## Shared calculation and display conventions
 

@@ -1,9 +1,9 @@
 # market-trends
 
-Build seven historical financial and economic ratios as JSON and CSV for your
-own charts, analysis, or applications. This repository contains the calculations
+Build maintained market trends and commentary datasets as JSON and CSV for
+your own charts, analysis, or applications. This repository contains the calculations
 and source metadata behind the charts at
-[jameswarrick.com/money/trends/](https://www.jameswarrick.com/money/trends/).
+[jameswarrick.com/markets/](https://www.jameswarrick.com/markets/).
 
 ## Quick start
 
@@ -25,7 +25,7 @@ trends build
 
 The first build needs internet access to download its inputs. The current
 source adapters do not require API keys. A successful full build produces
-`dist-trends/index.json` and one JSON and CSV file for each of the seven series.
+`dist-trends/index.json` and one JSON and CSV file for each of the three maintained trends.
 JSON includes observations, chart metadata, and sources; CSV contains
 `date,value` rows. Chart rendering belongs to the consuming application.
 
@@ -39,14 +39,16 @@ TRENDS_REFRESH=1 trends build
 
 ## Choose your next step
 
-Dated article datasets are a separate collection: `trends articles build`
-writes `dist-commentary/` and leaves the maintained trends in `dist-trends/` unchanged.
+Six commentary datasets are grouped by article in a separate collection.
+`trends articles groups` lists those groups and their fixed default date windows.
+`trends articles build` uses those dates, with optional `--from` and `--to` overrides, and writes
+`dist-commentary/` and leaves the three maintained trends in `dist-trends/` unchanged.
 
 | I want to… | Read |
 | --- | --- |
 | Run a command, check one series, or resolve an error | [CLI reference](cli.md) |
 | Understand a formula, input, or historical limitation | [Series](series.md) |
-| Build, consume, or add a dated article dataset | [Article series](article-series.md) |
+| Build, consume, or add a commentary dataset | [Article series](article-series.md) |
 | Load the JSON or CSV into an application | [Output reference](output.md) |
 | Inspect provenance, cache behavior, and data terms | [Sources and licences](sources.md) |
 | Change the code, run checks, or preview these docs | [Development](development.md) |
@@ -59,9 +61,10 @@ writes `dist-commentary/` and leaves the maintained trends in `dist-trends/` unc
   See [partial builds](cli.md#build-one-series-safely).
 - **Checks can write to the cache.** `trends check` computes and validates
   without changing generated output. It can still download missing inputs.
-- **A fresh clone has six series' data files.** Bitcoin output is git-ignored
+- **A fresh clone has two trend series' data files.** Bitcoin output is git-ignored
   under the project's data policy, although it can be listed in the committed
-  index. Run a full build before expecting all seven sets of files.
+  index. Run a full build before expecting all three trend sets of files. The six commentary datasets
+  are committed separately under `dist-commentary/`.
 - **Data has its own terms.** The code is MIT; each JSON file records the
   licences of its inputs. Keep that metadata with the observations when you
   reuse them. See [Sources and licences](sources.md).

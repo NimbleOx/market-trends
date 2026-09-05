@@ -1,85 +1,180 @@
-# Article series
+# Commentary by article
 
-Article series are datasets prepared for dated analysis. They use a separate
-catalogue and output directory from maintained [trend series](series.md), while
-sharing source adapters, validation, and the JSON/CSV format.
+Commentary datasets are grouped by the article that uses them. They share source
+adapters, validation, and the JSON/CSV format with maintained trends, while
+keeping a separate catalogue and generated output.
 
-| | Trend series | Article series |
+| | Maintained trends | Commentary |
 | --- | --- | --- |
-| Builders | `src/market_trends/series/` | `src/market_trends/article_series/` |
-| Registry | `src/market_trends/registry.py` | `src/market_trends/article_series/registry.py` |
-| List | `trends list` | `trends articles list` |
+| Builders | `src/market_trends/trends/` | `src/market_trends/commentary/` |
+| Registry | `src/market_trends/registry.py` | `src/market_trends/commentary/registry.py` |
+| List datasets | `trends list` | `trends articles list` |
+| List article groups | — | `trends articles groups` |
 | Validate | `trends check` | `trends articles check` |
 | Generate | `trends build` | `trends articles build` |
 | Default output | `dist-trends/` | `dist-commentary/` |
 
-Use trend series for maintained histories that extend as new observations
-arrive. Use article series when an analysis needs a defined observation window
-or a dataset that is reviewed separately from the maintained catalogue.
+The existing `articles` CLI name is retained. Each series ID belongs to exactly
+one catalogue. An article can reference a shared trend, such as the Buffett
+indicator, without duplicating its builder or its generated files.
 
-Ordinary trend builds leave article output alone, and article builds leave
-`dist-trends/` alone. Article output lives outside `dist-trends/` so it is also excluded from
-consumers that copy the entire trend directory.
+## Commentary groups
+
+| Article slug | Owned commentary datasets | Shared trend references |
+| --- | --- | --- |
+| `analyzing-the-effects-of-tariffs-on-prices-and-inflation` | `effective-tariff-rate` | — |
+| `uncle-sam-has-competition` | `treasury-10-year-yield-2026`, `treasury-30-year-yield-2026` | — |
+| `why-the-buffett-indicator-keeps-rising` | `corporate-profit-share`, `federal-deficit-share`, `market-value-per-dollar-of-profit` | `buffett-indicator` |
+
+All six datasets use inclusive date windows, with fixed defaults configured
+per article in this project and optional overrides for each run. The Treasury
+pair fetches each calendar year covered by its effective window. Its default
+January 2–September 3, 2026 span preserves the original snapshot's coverage.
+Existing Treasury IDs retain
+their `2026` suffix for compatibility with chart embeds, but the requested
+window controls which years are gathered.
+
+Quarterly ratios compute complete periods first, then select observations by
+their period-start dates. A `--to 2025-07-01` bound includes the Q3 observation,
+whose calculation still uses the full quarter's inputs. It does not claim those
+inputs were available on July 1. Chart rendering remains in the consuming site.
+
+Read the [ratio definitions](series.md) for formulas and source units. The
+Treasury builder is `src/market_trends/commentary/uncle_sam_has_competition.py`;
+its module docstring and tests document the exact source, window behavior, and reference
+readings. The Buffett commentary's three supporting builders live together
+under `src/market_trends/commentary/why_the_buffett_indicator_keeps_rising/`.
 
 ## Discover and build
 
 From the checkout with the [environment active](development.md#set-up-a-checkout):
 
 ```bash
+trends articles groups
 trends articles list
 trends articles check
 trends articles build
 ```
 
-`list` prints registered IDs without fetching data. `check` computes and
-validates selected series without writing generated output. `build` validates
-all selected series before writing their JSON, CSV, and index. Both `check`
-and `build` can download missing source inputs into the cache.
+`groups` lists article slugs, titles, default date windows, owned dataset IDs, and shared trend
+references. `list` remains one owned dataset ID per line for scripts. Neither
+command fetches data or writes files. `check` computes and validates selected
+datasets without writing output. `build` validates all selected datasets before
+writing their JSON, CSV, and index. Both can download missing source inputs.
 
-Read the builder module for a series' definition, date window, transformations,
-and reference readings. These details belong with the implementation and its
-tests. The generated JSON carries the actual coverage, units, display metadata,
-and source records for consumers.
+A full commentary build writes six JSON/CSV pairs and an index: 13 files.
+Ordinary trend builds leave commentary output alone; commentary builds leave
+`dist-trends/` alone, including any shared trends named in article metadata.
 
-## Select a subset or output directory
-
-Article commands accept the same `--only` and `--out` options as trend commands.
-Replace `SERIES_ID` below with an ID returned by `trends articles list`:
+## Select an article or individual datasets
 
 ```bash
-trends articles check --only SERIES_ID
-trends articles build --only SERIES_ID --out /tmp/article-preview
+trends articles check --article why-the-buffett-indicator-keeps-rising
+trends articles build --article uncle-sam-has-competition --out /tmp/treasury-preview
+trends articles build --only corporate-profit-share --out /tmp/profit-preview
 ```
 
-Omitting `--only`, or supplying it without IDs, selects the entire article
-catalogue. An ID from the trend catalogue is not accepted by article commands.
-Date bounds and transformations are configured in each builder; the CLI does
-not provide `--from` or `--to` overrides.
+`--article SLUG` selects the commentary datasets owned by that article. It is
+mutually exclusive with `--only`. Unknown article slugs or series IDs are
+rejected before building. Omitting both options, or using a bare `--only`,
+selects the entire commentary catalogue.
 
-A build replaces its output index and removes unselected JSON/CSV files from
-that output's `series/` directory. It does not merge a partial build with an
-older full build. Use a separate output directory for partial previews.
+Shared trends are listed as references, but built separately. To reproduce
+all the datasets used by the Buffett commentary in separate preview folders:
 
-The CLI rejects an output path inside the other collection's default directory,
-and a custom directory whose index lists registered series from the other
-collection. Give custom article and trend builds separate paths.
+```bash
+trends articles build --article why-the-buffett-indicator-keeps-rising --out /tmp/buffett-commentary
+trends build --only buffett-indicator --out /tmp/buffett-trend
+```
+
+A build replaces its output index and removes unselected JSON/CSV files directly
+under that output's `series/` directory. This also applies to `--article`: use a
+separate `--out` for previews so selecting one article does not remove the other
+articles' generated files.
+
+## Default dates and overrides
+
+Each `Article` in `src/market_trends/commentary/registry.py` has a hard-coded
+`default_window`. Checks and builds use these dates when no overrides are given:
+
+| Article | From (inclusive) | To (inclusive) |
+| --- | --- | --- |
+| Analyzing the Effects of Tariffs on Prices and Inflation | 1992-01-01 | 2026-04-01 |
+| Uncle Sam Has Competition | 2026-01-02 | 2026-09-03 |
+| Why the Buffett Indicator Keeps Rising | 1947-01-01 | 2026-04-01 |
+
+These windows preserve the existing snapshots' observations. They remain fixed
+until the project configuration is edited; they do not advance with today's date.
+`trends articles groups` displays the configured dates.
+
+Both `--from YYYY-MM-DD` and `--to YYYY-MM-DD` are optional. Each supplied flag
+replaces its bound for all selected articles, while an omitted bound retains
+each article's own default. Supplying both dates applies one common window to
+the selection. Overrides affect only that run and do not change the configuration.
+
+```bash
+trends articles check --article uncle-sam-has-competition --to 2026-09-04
+trends articles build --from 2025-01-01 --to 2026-09-03 --out /tmp/window-preview
+```
+
+Bounds are inclusive and must be valid calendar dates with the start on or
+before the end. All selected windows are validated before gathering data;
+an override that conflicts with any selected article's remaining default is rejected.
+
+Only recorded observations survive. Dates without observations, such as
+weekends and holidays, are not filled, and a bound need not equal an observation
+date. `firstDate` and `lastDate` report actual coverage, which can fall inside
+the requested window. A window is an observation filter, not a guarantee of
+complete source coverage. Runs with fewer than two observations in any selected
+dataset fail before replacing output.
+
+The source schema and calculations are validated before filtering. This keeps
+an invalid input from being hidden by a narrow window. Each generated series
+JSON and its index entry record the effective bounds in a `window` object,
+whether they came from defaults or overrides:
+
+```json
+{"window": {"from": "2026-01-02", "to": "2026-09-03"}}
+```
+
+The Python builders accept `DateWindow(start, end)` from `market_trends.schema`.
+A programmatic build can supply a different explicit window to each builder;
+the emitted index preserves the window used by each series.
+
+The CLI rejects the other collection's default output directory and directories
+inside it. New indexes carry a `collection` marker, which also prevents writing
+the wrong collection to a custom output directory, even when its index is empty.
+Older custom indexes are checked by their series IDs.
 
 ## Read and consume output
 
-Each selected series produces a JSON/CSV pair, alongside one index:
+The filenames remain flat and stable; article membership is recorded in the
+index rather than encoded in each dataset's path:
 
 ```text
 dist-commentary/
 ├── index.json
 └── series/
-    ├── <id>.json
-    ├── <id>.csv
+    ├── corporate-profit-share.json
+    ├── corporate-profit-share.csv
+    ├── treasury-10-year-yield-2026.json
     └── ...
 ```
 
-The index uses [schema version 1](output.md), and its file paths are relative to
-the directory containing the index. Consumers can discover the available files
-without hardcoding a dataset count or filenames:
+The index uses [schema version 1](output.md), with additive `collection` and
+`articles` fields. `collection` is `commentary`. Each `articles` entry contains:
+
+| Field | Meaning |
+| --- | --- |
+| `id` | Article slug used with `--article`. |
+| `title` | Article title for display. |
+| `series` | Owned dataset IDs included in this particular build; resolve their paths through the index's top-level `series` list. |
+| `trendSeries` | Shared trend IDs; resolve their files through the separate trend index. They are not copied into commentary output. |
+
+Partial builds include only groups with emitted commentary data, and only the
+owned IDs actually emitted. Shared trend references describe the article as a
+whole. All file paths in a top-level series entry remain relative to its own
+index, so custom output directories work without rewriting file paths.
 
 ```python
 import json
@@ -87,67 +182,87 @@ from pathlib import Path
 
 root = Path("dist-commentary")
 index = json.loads((root / "index.json").read_text(encoding="utf-8"))
-for entry in index["series"]:
-    series = json.loads((root / entry["file"]).read_text(encoding="utf-8"))
-    print(series["id"], series["firstDate"], series["lastDate"], series["observationCount"])
+by_id = {entry["id"]: entry for entry in index["series"]}
+for article in index["articles"]:
+    print(article["title"])
+    for series_id in article["series"]:
+        series = json.loads((root / by_id[series_id]["file"]).read_text(encoding="utf-8"))
+        print(series_id, series["firstDate"], series["lastDate"])
+    for series_id in article["trendSeries"]:
+        print(series_id, "is available from the trend catalogue")
 ```
 
-Use JSON when importing chart data or inspecting provenance. Keep each CSV
-with its JSON: CSV contains observations only, without units or source terms.
-See [Output](output.md) for the full field contract and loading examples.
+Use JSON for observations, display metadata, and provenance. Keep each CSV
+with its JSON: CSV contains observations only, without source terms or units.
 
-In a consuming application, keep article imports separate from maintained
-trend imports. Update article data deliberately after reviewing the generated
-diff. Chart rendering, interaction, and publishing belong to the consumer;
-this project produces data files and does not modify downstream applications.
+## Migrate from the mixed trend catalogue
+
+The four commentary ratios previously emitted by `trends build` now belong to
+`trends articles build`. Their IDs and numerical definitions are unchanged.
+After updating this checkout, run both complete builds:
+
+```bash
+trends articles build
+trends build
+```
+
+The first command emits the six commentary datasets within their articles'
+configured default windows. To reproduce a snapshot with different dates,
+select its article or dataset and pass the bounds recorded in its `window`
+metadata; for older output without that field, use its `firstDate` and `lastDate`.
+The second rebuilds the
+trend index with its three maintained entries and removes the four old
+commentary JSON/CSV pairs from `dist-trends/series/`. Legacy default indexes
+without a collection marker are accepted for this migration. For older custom
+output directories containing the mixed catalogue, use a fresh output directory.
+
+Consumers that previously copied only `dist-trends/` must now import both
+collections. In the site, the corresponding destinations are `src/data/trends/`
+and `src/data/article-series/`. Import commentary deliberately, and remove the
+old copies of the four moved IDs from the trend destination to keep IDs unique.
+Update the site's importer before running its next trend sync; copying only the
+new trend output would remove data needed by commentary charts. This project
+produces data and does not modify downstream applications.
 
 ## Refresh and review
 
 ```bash
 TRENDS_REFRESH=1 trends articles check
-trends articles build --out /tmp/article-review
-diff -ru dist-commentary /tmp/article-review
+trends articles build --out /tmp/commentary-review
+diff -ru dist-commentary /tmp/commentary-review
 ```
 
-The refresh variable requests fresh inputs from the selected source adapters.
-Without it, existing cached responses are reused. `--out` relocates generated
-files, not the cache. See [CLI](cli.md#use-and-refresh-the-cache) for details.
+Refresh requests fresh source responses. Without it, existing cache entries
+are reused. `--out` relocates output files, not the cache. A fixed window does
+not freeze historical values: upstream publishers can revise observations.
+Review values, dates, counts, units, and sources before replacing an article's
+published snapshot. Preserve inputs and the code revision when exact
+reproduction matters.
 
-A fixed date window does not freeze the upstream data vintage: publishers can
-revise historical observations. Review changed values, dates, counts, units,
-and source metadata before replacing an existing snapshot. Keep the original
-inputs and code revision when exact reproduction of an earlier run matters.
+`generatedAt` changes on each build. Adapters record the local build date in
+`sources[].retrievedAt`, including cache hits. A timestamp-only diff does not
+mean observations changed. See [Build dates and reproducibility](output.md#build-dates-and-reproducibility).
 
-`generatedAt` changes on each build. Current adapters record the local build
-date in `sources[].retrievedAt`, including cache hits, rather than the original
-download date. A timestamp-only diff does not mean the observations changed.
-See [Build dates and reproducibility](output.md#build-dates-and-reproducibility).
+## Add a commentary dataset
 
-## Add an article series
-
-1. Create a module under `src/market_trends/article_series/` with a
-   zero-argument builder returning a `Series`. Keep its ID unique across both
-   catalogues.
-2. Describe the measure, exact source, input units, date window, transformations,
-   and missing-value policy in the module docstring. Put dataset-specific
-   coverage and reference readings there and in tests, so the general guides
-   do not depend on individual publications.
-3. Fetch and parse inputs through a shared source adapter. Keep article-specific
-   window selection and transformations in the builder. Record source terms
-   and cache routing as described in [Sources and licences](sources.md).
-4. Set the title, unit, frequency, precision, scale, description, sources, and
-   observations. Declare coverage requirements explicitly when a truncated
-   source would otherwise produce a misleading snapshot. Validation rejects
-   duplicate dates, non-finite values, and other structural errors; it does not
-   know which dates or economic interpretation an analysis requires.
-5. Register the builder in `src/market_trends/article_series/registry.py`.
-   Keep it out of the maintained trend registry.
-6. Add offline tests for parsing, transformations, and window boundaries, plus
-   meaningful reference-value and live-source checks. Mark tests that fetch
-   upstream data with `@pytest.mark.network`.
-7. Build into a preview directory and review the output before replacing a
+1. Add a builder under `src/market_trends/commentary/`, alongside the other
+   datasets for its article. A group with several calculations can use a
+   package, as the Buffett commentary does.
+2. Accept a `DateWindow` argument and document the source, measure, units,
+   transformations, and missing-data policy. Reuse shared adapters, compute any
+   complete periods before filtering, and return `windowed(series, window)`
+   from `market_trends.schema`. Do not embed a fixed source year or date span
+   in the builder.
+3. Add the builder to its `Article` entry in `commentary/registry.py`, or add a
+   new article slug, title, and `default_window=DateWindow(start, end)` with fixed
+   dates appropriate to the article. `BUILDERS` is derived from those entries. Keep
+   each ID unique across both catalogues and owned by only one article group.
+4. If an article uses an existing maintained trend, add its ID to `trend_series`
+   instead of copying the builder into commentary.
+5. Add meaningful parsing, calculation, and coverage tests. Live-source tests
+   belong under `@pytest.mark.network`. Update the catalogue documentation.
+6. Build into a preview directory and review the output before replacing a
    published snapshot.
 
-Run Ruff, `pytest -m "not network"`, and `pytest -m network` when changing a
-builder or source. Run the strict MkDocs build when editing documentation.
-See [Development](development.md) for the complete commands.
+Run Ruff, offline and network tests when changing builders or sources, and a
+strict MkDocs build for documentation. See [Development](development.md).

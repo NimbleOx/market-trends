@@ -19,7 +19,8 @@ an editable checkout. `trends build --out DIR` produces the same layout in
 series files from that output; see [CLI](cli.md#build-one-series-safely).
 
 `trends articles build` uses the same schema and file layout under a separate
-`dist-commentary/` root. Its index contains article series only. See
+`dist-commentary/` root. Its index contains commentary datasets and article
+group metadata; shared trends are referenced without duplicating files. See
 [Article series](article-series.md) for the workflow and collection boundaries.
 
 ## Read a series
@@ -61,8 +62,17 @@ committed snapshot. See [Sources and licences](sources.md) for the data terms.
 
 The index contains one entry per series selected for the build, sorted by ID.
 `file` points to the JSON; `csv` points to the CSV. The remaining entry fields
-are copied or derived from the series. The index omits `precision`,
+are copied or derived from the series. Windowed entries also carry the requested `window.from` and `window.to` dates.
+The index omits `precision`,
 `description`, and `sources`; load the series JSON when you need those fields.
+
+CLI builds also include a top-level `collection` field, either `trends` or
+`commentary`, to identify the output's owner. Commentary indexes include an
+`articles` array describing each emitted article group, its owned dataset IDs,
+and its shared trend references. See [Commentary output](article-series.md#read-and-consume-output)
+for those fields. These additions retain schema version 1 and the existing
+series payloads and file paths. Readers of older snapshots should allow these
+index metadata fields to be absent.
 
 This illustrative dataset contains one series with two observations:
 
@@ -135,6 +145,7 @@ source; it is not one of the published series:
 | `generatedAt` | ISO 8601 timestamp | UTC serialization time, to the second, with offset `+00:00`. |
 | `firstDate`, `lastDate` | `YYYY-MM-DD` strings | Dates of the first and last observation. |
 | `observationCount` | integer | Number of elements in `observations`. |
+| `window` | object, optional | Requested inclusive `from` and `to` dates for a windowed run. Actual coverage is reported by `firstDate` and `lastDate`. Older snapshots and full-history trends may omit it. |
 | `observations` | array of objects | Each has a `date` (`YYYY-MM-DD`) and a finite numeric `value`, in strictly ascending date order. |
 
 Dates label observation periods, not release dates or fetch times. Maintained
@@ -220,6 +231,7 @@ Before output writing begins, `validate()` checks each selected series for:
 - At least one source, each with a nonempty licence other than `unknown`
   (case-insensitive).
 - At least two observations, strictly ascending dates, and no duplicate dates.
+- All observations lie inside the recorded window when one is present.
 - Finite values, with all values positive when the scale is `log`.
 
 The emitter derives `firstDate`, `lastDate`, and `observationCount` from the

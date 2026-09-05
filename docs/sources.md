@@ -40,7 +40,7 @@ maturities, selects columns by header, and returns observations in ascending
 date order. Values remain in percent, and missing readings are omitted.
 
 Responses are cached as `cache/open/treasury-par-yields-<year>.csv`. The adapter
-accepts a year and maturity; individual builders define observation windows
+accepts a year and maturity; article runs supply their observation windows
 and reference-value checks. Source retrieval is shared infrastructure and does
 not determine which output collection a builder belongs to.
 
@@ -152,7 +152,7 @@ trends check
 To fetch again and validate a single series without replacing `dist-trends/`:
 
 ```bash
-TRENDS_REFRESH=1 trends check --only corporate-profit-share
+TRENDS_REFRESH=1 trends articles check --only corporate-profit-share --from 2025-01-01 --to 2026-09-03
 ```
 
 Both commands can write cache files. A refresh replaces each response as it

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-05T18:43:06+00:00",
+  "generatedAt": "2026-09-05T20:06:16+00:00",
   "series": [
     {
       "id": "btc-in-gold",
@@ -25,6 +25,56 @@
       "observationCount": 302,
       "file": "series/buffett-indicator.json",
       "csv": "series/buffett-indicator.csv"
+    },
+    {
+      "id": "federal-deficit",
+      "title": "US federal deficit",
+      "unit": "billions of dollars",
+      "frequency": "annual",
+      "scale": "linear",
+      "firstDate": "1901-06-30",
+      "lastDate": "2025-09-30",
+      "observationCount": 125,
+      "file": "series/federal-deficit.json",
+      "csv": "series/federal-deficit.csv",
+      "dateBasis": "fiscal-year"
+    },
+    {
+      "id": "federal-deficit-gdp",
+      "title": "US federal deficit as a share of GDP",
+      "unit": "percent of GDP",
+      "frequency": "annual",
+      "scale": "linear",
+      "firstDate": "1930-06-30",
+      "lastDate": "2025-09-30",
+      "observationCount": 96,
+      "file": "series/federal-deficit-gdp.json",
+      "csv": "series/federal-deficit-gdp.csv",
+      "dateBasis": "fiscal-year"
+    },
+    {
+      "id": "federal-deficit-monthly",
+      "title": "US monthly federal deficit",
+      "unit": "billions of dollars",
+      "frequency": "monthly",
+      "scale": "linear",
+      "firstDate": "1980-10-01",
+      "lastDate": "2026-07-01",
+      "observationCount": 550,
+      "file": "series/federal-deficit-monthly.json",
+      "csv": "series/federal-deficit-monthly.csv"
+    },
+    {
+      "id": "federal-deficit-ttm",
+      "title": "US federal deficit, trailing 12 months",
+      "unit": "billions of dollars",
+      "frequency": "monthly",
+      "scale": "linear",
+      "firstDate": "1981-09-01",
+      "lastDate": "2026-07-01",
+      "observationCount": 539,
+      "file": "series/federal-deficit-ttm.json",
+      "csv": "series/federal-deficit-ttm.csv"
     },
     {
       "id": "sp500-in-gold",

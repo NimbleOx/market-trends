@@ -71,6 +71,9 @@ class Series:
     scale: str = "linear"
     observations: list[Observation] = field(default_factory=list)
     window: DateWindow | None = None
+    #: Optional period-label convention. Fiscal years retain their source
+    #: year-end dates and should be displayed as FY YYYY by consumers.
+    date_basis: str | None = None
 
     @property
     def first_date(self) -> date:
@@ -93,6 +96,10 @@ def validate(series: Series) -> None:
         fail("id must be URL-safe; use hyphens")
     if series.frequency not in FREQUENCIES:
         fail(f"frequency {series.frequency!r} is not one of {FREQUENCIES}")
+    if series.date_basis not in (None, "fiscal-year"):
+        fail("date_basis must be omitted or 'fiscal-year'")
+    if series.date_basis == "fiscal-year" and series.frequency != "annual":
+        fail("fiscal-year date_basis requires annual frequency")
     if series.scale not in SCALES:
         fail(f"scale {series.scale!r} is not one of {SCALES}")
     if series.scale == "log" and any(o.value <= 0 for o in series.observations):
@@ -178,4 +185,6 @@ def to_dict(series: Series) -> dict:
     }
     if series.window is not None:
         payload["window"] = series.window.to_dict()
+    if series.date_basis is not None:
+        payload["dateBasis"] = series.date_basis
     return payload

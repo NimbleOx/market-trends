@@ -77,6 +77,17 @@ def test_unknown_frequency_is_rejected():
         validate(series(frequency="fortnightly"))
 
 
+def test_fiscal_year_metadata_is_optional_and_requires_annual_frequency():
+    assert "dateBasis" not in to_dict(series())
+    assert to_dict(series(frequency="annual", date_basis="fiscal-year"))["dateBasis"] == (
+        "fiscal-year"
+    )
+    with pytest.raises(ValidationError, match="date_basis"):
+        validate(series(date_basis="fiscal-year"))
+    with pytest.raises(ValidationError, match="date_basis"):
+        validate(series(frequency="annual", date_basis="unknown"))
+
+
 def test_to_dict_carries_the_span_and_count():
     payload = to_dict(series())
     assert payload["firstDate"] == "2020-01-01"

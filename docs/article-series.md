@@ -211,7 +211,7 @@ configured default windows. To reproduce a snapshot with different dates,
 select its article or dataset and pass the bounds recorded in its `window`
 metadata; for older output without that field, use its `firstDate` and `lastDate`.
 The second rebuilds the
-trend index with its three maintained entries and removes the four old
+trend index with its maintained entries and removes the four old
 commentary JSON/CSV pairs from `dist-trends/series/`. Legacy default indexes
 without a collection marker are accepted for this migration. For older custom
 output directories containing the mixed catalogue, use a fresh output directory.

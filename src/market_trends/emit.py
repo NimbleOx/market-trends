@@ -99,6 +99,7 @@ def write(
                 "file": f"series/{series.id}.json",
                 "csv": f"series/{series.id}.csv",
                 **({"window": series.window.to_dict()} if series.window is not None else {}),
+                **({"dateBasis": series.date_basis} if series.date_basis is not None else {}),
             }
             for series in sorted(series_list, key=lambda s: s.id)
         ],

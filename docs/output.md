@@ -63,6 +63,7 @@ committed snapshot. See [Sources and licences](sources.md) for the data terms.
 The index contains one entry per series selected for the build, sorted by ID.
 `file` points to the JSON; `csv` points to the CSV. The remaining entry fields
 are copied or derived from the series. Windowed entries also carry the requested `window.from` and `window.to` dates.
+Fiscal-year series include the optional `dateBasis: "fiscal-year"` metadata.
 The index omits `precision`,
 `description`, and `sources`; load the series JSON when you need those fields.
 
@@ -139,6 +140,7 @@ source; it is not one of the published series:
 | `unit` | string | Unit shared by all observation values. |
 | `precision` | integer | Suggested decimal places for display. It does not control stored precision. |
 | `frequency` | string | Declared frequency: `daily`, `monthly`, `quarterly`, or `annual`. Does not guarantee a gap-free sequence. |
+| `dateBasis` | string, optional | `fiscal-year` for annual fiscal-year observations. Omitted for existing calendar-period and daily series. |
 | `scale` | string | Suggested axis scale: `linear` or `log`. Log series contain only positive values. |
 | `description` | string | Explanation of what the series measures. |
 | `sources` | array of objects | Provenance records with `name`, `url`, `licence`, and `retrievedAt`. |
@@ -148,10 +150,28 @@ source; it is not one of the published series:
 | `window` | object, optional | Requested inclusive `from` and `to` dates for a windowed run. Actual coverage is reported by `firstDate` and `lastDate`. Older snapshots and full-history trends may omit it. |
 | `observations` | array of objects | Each has a `date` (`YYYY-MM-DD`) and a finite numeric `value`, in strictly ascending date order. |
 
-Dates label observation periods, not release dates or fetch times. Maintained
-trend builders use the first day of the month or quarter. Follow each
+Dates label observation periods, not release dates or fetch times. Monthly and
+quarterly trend builders use the first day of the month or quarter. Follow each
 [series definition](series.md) when interpreting a period; do not treat a
 quarterly value as a measurement taken on that single day.
+
+The annual federal budget series retain fiscal-year-end dates and set
+`dateBasis: "fiscal-year"` in their series and index metadata. Consumers should
+display those observations as fiscal years (for example, FY2025). June 30 is
+the year end through FY1976, and September 30 from FY1977. The 1976 transition
+quarter is excluded. This optional field retains schema version 1; older and
+non-fiscal snapshots omit it.
+
+The monthly federal budget series instead uses the first day of its reference
+month and omits `dateBasis`. It records actual monthly flows, including
+completed months of an incomplete fiscal year, without seasonal adjustment,
+interpolation, or annualization.
+
+The trailing-12-month federal budget series shares monthly reference dates
+and omits `dateBasis`. Each point sums the current month and eleven previous
+consecutive months. Incomplete and gap-crossing windows are omitted. Its
+monthly frequency describes how often the trailing-year total is updated,
+not the period covered by each total.
 
 Daily article series preserve the source's observation date. Weekends, holidays,
 and missing readings are not filled in; `daily` does not mean one row per
@@ -161,7 +181,8 @@ coverage and missing observations.
 ### Numeric precision
 
 The JSON and CSV retain the values returned by the builder. Current builders
-round most ratios to four decimal places and `btc-in-gold` to six. The emitter
+round most ratios to four decimal places and `btc-in-gold` and
+`federal-deficit-monthly` and `federal-deficit-ttm` to six. The emitter
 does not round again to `precision`: in the example above, `1.2345` is stored
 and `precision: 1` suggests displaying `1.2`. Numeric text may use exponent
 notation. Keep stored values for calculations and apply display formatting
@@ -227,6 +248,7 @@ Before output writing begins, `validate()` checks each selected series for:
 
 - A nonempty, lowercase ID with no leading/trailing whitespace or literal spaces.
 - A recognized `frequency` and `scale`.
+- An omitted `dateBasis`, or `fiscal-year` paired with annual frequency.
 - Nonempty `title`, `unit`, and `description` fields.
 - At least one source, each with a nonempty licence other than `unknown`
   (case-insensitive).

@@ -53,6 +53,23 @@ LICENCES: dict[str, tuple[str, str, bool]] = {
         "Public domain (US federal government work)",
         True,
     ),
+    "FYFSD": (
+        "US Office of Management and Budget, Federal Surplus or Deficit, via FRED",
+        "Public domain (US federal government work)",
+        True,
+    ),
+    "FYFSDFYGDP": (
+        "US Office of Management and Budget, Federal Surplus or Deficit as Percent of "
+        "Gross Domestic Product, via FRED",
+        "Public domain (US federal government work)",
+        True,
+    ),
+    "MTSDS133FMS": (
+        "US Department of the Treasury, Monthly Treasury Statement, "
+        "Federal Surplus or Deficit, via FRED",
+        "Public domain (US federal government work)",
+        True,
+    ),
     "B235RC1Q027SBEA": (
         "US Bureau of Economic Analysis, Federal Government Current Tax Receipts: Customs Duties",
         "Public domain (US federal government work)",

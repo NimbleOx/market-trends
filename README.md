@@ -35,8 +35,8 @@ trends list
 trends build
 ```
 
-The first build downloads the upstream data, computes and validates the three
-maintained trends, and writes **7 files**: three JSON files, three CSV files, and an index.
+The first build downloads the upstream data, computes and validates the seven
+maintained trends, and writes **15 files**: seven JSON files, seven CSV files, and an index.
 It needs internet access; the current adapters do not require API keys. Later
 builds reuse the local cache until you request a refresh.
 
@@ -47,8 +47,8 @@ output paths and troubleshooting.
 
 ## Read the output
 
-You can inspect the two trend series committed under `dist-trends/` immediately after
-cloning. To generate all three trend series locally, run the full build above.
+You can inspect the six trend series committed under `dist-trends/` immediately after
+cloning. To generate all seven trend series locally, run the full build above.
 
 After a successful full build:
 
@@ -58,7 +58,7 @@ dist-trends/
 └── series/
     ├── sp500-in-gold.json         # Metadata, sources, and observations
     ├── sp500-in-gold.csv          # date,value rows
-    └── ...                       # The other two trend series, in both formats
+    └── ...                       # The other six trend series, in both formats
 ```
 
 For example, run this Python code from the checkout root:
@@ -76,7 +76,7 @@ The [output reference](docs/output.md) documents every field, date conventions,
 timestamps, and CSV loading. Keep each CSV with its JSON: source and licence
 metadata appear only in the JSON.
 
-The repository includes generated files for two trend series and all six
+The repository includes generated files for six trend series and all six
 commentary datasets. Bitcoin output is git-ignored under the project's data
 policy, so a fresh clone's index can refer
 to missing Bitcoin files until you run a full build.
@@ -88,6 +88,10 @@ to missing Bitcoin files until you run a full build.
 | `sp500-in-gold` | S&P Composite index divided by the gold price | Monthly | 1871 |
 | `btc-in-gold` | Bitcoin price divided by the gold price | Monthly | 2010 |
 | `buffett-indicator` | Nonfinancial corporate equity value as a percentage of GDP | Quarterly | 1947 |
+| `federal-deficit` | US federal budget deficit in billions of current dollars | Annual (fiscal year) | 1901 |
+| `federal-deficit-gdp` | US federal budget deficit as a percentage of fiscal-year GDP | Annual (fiscal year) | 1930 |
+| `federal-deficit-monthly` | Actual monthly US federal budget deficit in billions of current dollars | Monthly | 1980 |
+| `federal-deficit-ttm` | Trailing 12-month US federal budget deficit in billions of current dollars | Monthly | 1981 |
 
 See [Series](docs/series.md) for formulas, units, joins, rounding, and limitations.
 In particular, gold prices before 1960 repeat annual averages in monthly rows;

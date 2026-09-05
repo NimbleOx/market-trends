@@ -1,14 +1,16 @@
 # Series
 
-This page documents three maintained trends and four commentary ratios.
-Each builder joins upstream observations, computes a ratio, and returns a
+This page documents seven maintained trends and four commentary ratios.
+Each builder transforms or combines upstream observations and returns a
 `Series` with its source records and display metadata. A build writes
 `series/<id>.json` and `series/<id>.csv` under the output directory.
 See [Output](output.md) for the file format and
 [Sources and licences](sources.md) for reuse terms.
 
-The trend registry contains `sp500-in-gold`, `btc-in-gold`, and
-`buffett-indicator`. The other four ratios belong to commentary article groups
+The trend registry contains `sp500-in-gold`, `btc-in-gold`,
+`buffett-indicator`, `federal-deficit`, `federal-deficit-gdp`,
+`federal-deficit-monthly`, and `federal-deficit-ttm`.
+The other four ratios belong to commentary article groups
 and are emitted under `dist-commentary/`. The daily Treasury commentary pair
 is documented with its [article group](article-series.md#commentary-groups).
 
@@ -17,6 +19,10 @@ is documented with its [article group](article-series.md#commentary-groups).
 | [`sp500-in-gold`](#sp500-in-gold) | S&P Composite index relative to gold | monthly | 1871-01 | linear | Trends |
 | [`btc-in-gold`](#btc-in-gold) | Gold equivalent of one bitcoin | monthly | 2010-09 | log | Trends |
 | [`buffett-indicator`](#buffett-indicator) | Nonfinancial corporate equity value / GDP | quarterly | 1947 Q4 | linear | Trends |
+| [`federal-deficit`](#federal-deficit) | Federal budget deficit in current dollars | annual (fiscal year) | FY1901 | linear | Trends |
+| [`federal-deficit-gdp`](#federal-deficit-gdp) | Federal budget deficit / fiscal-year GDP | annual (fiscal year) | FY1930 | linear | Trends |
+| [`federal-deficit-monthly`](#federal-deficit-monthly) | Actual monthly federal budget deficit in current dollars | monthly | 1980-10 | linear | Trends |
+| [`federal-deficit-ttm`](#federal-deficit-ttm) | Trailing 12-month federal budget deficit in current dollars | monthly | 1981-09 | linear | Trends |
 | [`corporate-profit-share`](#corporate-profit-share) | After-tax corporate profits / GDP | quarterly | 1947 Q1 | linear | Commentary |
 | [`market-value-per-dollar-of-profit`](#market-value-per-dollar-of-profit) | Nonfinancial corporate equity value / after-tax profits | quarterly | 1947 Q4 | linear | Commentary |
 | [`federal-deficit-share`](#federal-deficit-share) | Federal current expenditures minus receipts / GDP | quarterly | 1947 Q1 | linear | Commentary |
@@ -104,6 +110,114 @@ assumed identical to another chart labelled “Buffett indicator.” The
 describes the equity components.
 
 Implementation: [src/market_trends/trends/buffett_indicator.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/buffett_indicator.py).
+
+## federal-deficit
+
+```text
+value = −FYFSD / 1,000
+```
+
+OMB's [`FYFSD`](https://fred.stlouisfed.org/series/FYFSD), hosted by FRED,
+records federal budget surpluses as positive and deficits as negative, in
+millions of current dollars. Negation makes deficits positive and surpluses
+negative; division by 1,000 converts to billions. Stored values preserve
+million-dollar detail with three decimals, and `precision: 1` requests one
+decimal place for display. These are nominal dollars, without inflation
+adjustment. An annual deficit is a flow, not the stock of federal debt.
+
+The history begins in FY1901. Both annual budget series use historical actuals
+from their source; neither adds budget projections or a partial current year.
+Observation dates remain fiscal-year ends: June 30 through FY1976 and
+September 30 from FY1977. The separate July–September 1976 transition quarter
+is excluded from these annual inputs. The optional `dateBasis: "fiscal-year"`
+metadata tells consumers to label observations as fiscal years. See the
+[OMB Historical Tables introduction](https://www.whitehouse.gov/wp-content/uploads/2026/04/hist_intro_fy2027.pdf)
+for the fiscal-year convention and historical-table definitions.
+
+These unified-budget balances differ from the BEA national-accounts current
+expenditure/receipt gap in commentary's [federal-deficit-share](#federal-deficit-share).
+
+Implementation: [src/market_trends/trends/federal_deficit.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/federal_deficit.py).
+
+## federal-deficit-gdp
+
+```text
+value = −FYFSDFYGDP
+```
+
+[`FYFSDFYGDP`](https://fred.stlouisfed.org/series/FYFSDFYGDP) is OMB's federal
+budget surplus or deficit as a percentage of **fiscal-year GDP**. Negate the
+published percentage directly, keeping its stored precision, so deficits are
+positive and surpluses are negative. The result has `precision: 1` and begins
+in FY1930; no values are inferred before the source starts. This is a separate
+history from the longer dollar series, not a join with quarterly GDP.
+
+Do not substitute the similarly named FRED `FYFSGDA188S`: its denominator is
+calendar-year GDP. Fiscal-year dates, actuals coverage, and the omitted 1976
+transition quarter follow [federal-deficit](#federal-deficit). Both series use
+a linear scale so budget surpluses can appear below zero.
+
+Implementation: [src/market_trends/trends/federal_deficit.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/federal_deficit.py).
+
+## federal-deficit-monthly
+
+```text
+value = −MTSDS133FMS / 1,000
+```
+
+Treasury's Monthly Treasury Statement, hosted by FRED as
+[`MTSDS133FMS`](https://fred.stlouisfed.org/series/MTSDS133FMS), records the
+actual federal surplus or deficit for each month in millions of current
+dollars. Negate and divide by 1,000 to express deficits as positive and
+surpluses as negative, in billions. Stored values are rounded to six decimals;
+`precision: 1` requests one decimal for display. This is the nominal cash
+balance of the unified budget, without inflation or seasonal adjustment.
+
+The history begins in October 1980. Dates use the first day of the reference
+month and have no fiscal-year `dateBasis` metadata. Each observation is that
+month's actual balance, not an annualized rate or an interpolated annual value.
+Missing months are not filled. Completed months remain valid even when the
+fiscal year is incomplete, so this series can extend beyond the annual actuals.
+Tax-payment deadlines and payment timing contribute to substantial month-to-month
+changes, including seasonal surpluses.
+
+Monthly Treasury Statement sums can differ from OMB's revised annual history
+because source vintages and accounting adjustments differ. For example, the
+September 2026 snapshot's FY2025 monthly sum is $1,775.711461 billion, while
+`FYFSD` reports $1,774.684 billion. Each series preserves its own source;
+the builder does not force the monthly values to reconcile to the annual total.
+
+Implementation: [src/market_trends/trends/federal_deficit.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/federal_deficit.py).
+
+## federal-deficit-ttm
+
+```text
+value(t) = sum(federal-deficit-monthly for months t−11 through t)
+```
+
+The trailing-year total sums twelve consecutive signed observations from
+[`federal-deficit-monthly`](#federal-deficit-monthly), including the current
+reference month. It preserves the nominal billions-of-dollars units and source
+attribution. `math.fsum` computes each total, then the builder rounds to six
+decimals; `precision: 1` requests one decimal for display. Deficits remain
+positive and surpluses negative, on a linear scale.
+
+Each point covers a complete twelve-month span, recalculated monthly. Initial
+windows with fewer than twelve months are omitted. Windows crossing a missing
+month are also omitted until twelve consecutive observations are available
+again; twelve rows spread over thirteen calendar months are not a valid year.
+The calculation uses full history before any chart range filtering and never
+uses future months. Dates label the final reference month, with no fiscal-year
+`dateBasis` metadata. The first complete window ends in September 1981.
+
+This smooths the repeating calendar cycle by including each calendar month
+once. It is a trailing-year total, **not an official seasonally adjusted
+monthly estimate**. It can lag turning points, and exceptional payment shifts
+can remain visible. As with the underlying monthly data, source vintages and
+accounting adjustments mean a twelve-month Treasury sum can differ from OMB's
+annual history, even when the period ends in September.
+
+Implementation: [src/market_trends/trends/federal_deficit.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/federal_deficit.py).
 
 ## corporate-profit-share
 
@@ -197,17 +311,23 @@ Implementation: [src/market_trends/commentary/analyzing_the_effects_of_tariffs_o
 - **Dates identify periods.** Monthly rows use the first day of the month;
   quarterly rows use January 1, April 1, July 1, or October 1. A period-start
   label does not imply a first-day measurement: the equity numerator is a
-  quarter-end value.
+  quarter-end value. Annual federal budget observations retain fiscal-year ends.
 - **Joins use exact dates.** After any source aggregation, a builder keeps
   only dates present in every required input. It drops missing dates and
   nonpositive denominators rather than filling them. Coverage may have gaps,
   including early equity data with only annual observations.
-- **Aggregation follows the inputs.** GDP-based ratios remain quarterly;
+- **Aggregation follows the inputs.** Quarterly GDP-based ratios remain quarterly;
   daily Bitcoin readings become monthly averages; monthly imports become
   quarterly annualised values. Historical gold already contains annual values
-  repeated into monthly rows upstream, as described above.
-- **Storage and display differ.** All ratios except Bitcoin are rounded to
-  four decimal places. `precision` requests display decimals; it does not
+  repeated into monthly rows upstream, as described above. Annual federal
+  budget balances and the fiscal-year GDP share remain annual. Monthly budget
+  balances remain actual monthly flows, without seasonal adjustment or annualization.
+  The trailing-year series sums twelve consecutive monthly balances for each point.
+- **Storage and display differ.** Most ratios are rounded to four decimal
+  places; Bitcoin and the monthly and trailing-year federal budget balances use six, while the
+  annual federal budget GDP share preserves the upstream decimals and the
+  annual dollar series preserves million-dollar detail.
+  `precision` requests display decimals; it does not
   control calculation rounding. The quarterly series request one display
   decimal and a linear scale.
 - **Validation has a limited role.** It checks series structure and values,

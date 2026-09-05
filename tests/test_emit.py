@@ -82,3 +82,13 @@ def test_a_removed_series_does_not_linger(tmp_path):
     for suffix in (".json", ".csv"):
         assert not (tmp_path / "series" / f"old-name{suffix}").exists()
         assert (tmp_path / "series" / f"new-name{suffix}").exists()
+
+
+def test_index_and_series_preserve_fiscal_year_metadata(tmp_path):
+    fiscal = a_series()
+    fiscal.frequency = "annual"
+    fiscal.date_basis = "fiscal-year"
+    write([fiscal], tmp_path)
+    index = json.loads((tmp_path / "index.json").read_text())
+    payload = json.loads((tmp_path / "series" / "a-series.json").read_text())
+    assert index["series"][0]["dateBasis"] == payload["dateBasis"] == "fiscal-year"

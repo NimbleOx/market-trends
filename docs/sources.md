@@ -13,7 +13,8 @@ terms remain the basis for assessing a particular use.
 
 The cache column shows where the **current implementation** stores responses.
 It is a routing decision, not an independent verification of rights. External
-references on this page were reviewed on 4 September 2026.
+references on this page were reviewed on 4 September 2026; the three
+federal budget sources were added on 5 September 2026.
 
 | Input | Provider and use | Recorded licence | Cache |
 | --- | --- | --- | --- |
@@ -24,6 +25,9 @@ references on this page were reviewed on 4 September 2026.
 | FRED [`CP`](https://fred.stlouisfed.org/series/CP) | BEA; after-tax corporate profits, without IVA and CCAdj | Public domain (US federal government work) | `open/` |
 | FRED [`FGRECPT`](https://fred.stlouisfed.org/series/FGRECPT) | BEA; federal current receipts | Public domain (US federal government work) | `open/` |
 | FRED [`FGEXPND`](https://fred.stlouisfed.org/series/FGEXPND) | BEA; federal current expenditures | Public domain (US federal government work) | `open/` |
+| FRED [`FYFSD`](https://fred.stlouisfed.org/series/FYFSD) | OMB; federal budget surplus or deficit, fiscal years, millions of current dollars | Public domain (US federal government work) | `open/` |
+| FRED [`FYFSDFYGDP`](https://fred.stlouisfed.org/series/FYFSDFYGDP) | OMB; federal budget surplus or deficit as percent of fiscal-year GDP | Public domain (US federal government work) | `open/` |
+| FRED [`MTSDS133FMS`](https://fred.stlouisfed.org/series/MTSDS133FMS) | Treasury; actual monthly federal budget surplus or deficit, millions of current dollars, not seasonally adjusted | Public domain (US federal government work) | `open/` |
 | FRED [`B235RC1Q027SBEA`](https://fred.stlouisfed.org/series/B235RC1Q027SBEA) | BEA; customs duties | Public domain (US federal government work) | `open/` |
 | FRED [`BOPGIMP`](https://fred.stlouisfed.org/series/BOPGIMP) | Census and BEA; goods imports, balance-of-payments basis | Public domain (US federal government work) | `open/` |
 | [Blockchain.com market price](https://www.blockchain.com/explorer/charts/market-price) | Bitcoin prices | No open licence stated; blockchain.com terms | `restricted/` |
@@ -46,7 +50,7 @@ not determine which output collection a builder belongs to.
 
 ## FRED data and service access
 
-The seven FRED inputs above carry the “Public Domain: Citation Requested”
+The ten FRED inputs above carry the “Public Domain: Citation Requested”
 classification on their series pages. FRED hosts data from many providers;
 other series can have different restrictions. Cite both the original provider
 and FRED when using these records, following the suggested citation on each

@@ -95,7 +95,7 @@ The CLI computes and validates every selected series before the emitter writes
 any output. A computation or validation failure leaves the output directory
 unchanged, although source data may already have been cached.
 
-A successful full build currently writes 7 files: two per series plus
+A successful full build currently writes 15 files: two per series plus
 `index.json`. The final line reports the number of files written and the output
 directory. See [Output](output.md) for their contents and how to read them.
 

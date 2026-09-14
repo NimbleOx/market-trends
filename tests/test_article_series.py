@@ -183,8 +183,9 @@ def test_output_override_cannot_cross_collections(local_cli, tmp_path):
 
 def test_commentary_is_grouped_by_article_with_shared_trends_referenced():
     assert set(BUILDERS) == {
-        "btc-in-gold", "buffett-indicator", "federal-deficit", "federal-deficit-gdp",
-        "federal-deficit-monthly", "federal-deficit-ttm", "sp500-in-gold",
+        "btc-in-gold", "buffett-indicator", "capital-share-gdi",
+        "federal-deficit", "federal-deficit-gdp",
+        "federal-deficit-monthly", "federal-deficit-ttm", "labor-share-gdi", "sp500-in-gold",
     }
     assert set(ARTICLE_BUILDERS) == {
         "corporate-profit-share", "federal-deficit-share", "market-value-per-dollar-of-profit",

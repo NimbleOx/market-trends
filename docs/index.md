@@ -25,7 +25,7 @@ trends build
 
 The first build needs internet access to download its inputs. The current
 source adapters do not require API keys. A successful full build produces
-`dist-trends/index.json` and one JSON and CSV file for each of the seven maintained trends.
+`dist-trends/index.json` and one JSON and CSV file for each of the nine maintained trends.
 JSON includes observations, chart metadata, and sources; CSV contains
 `date,value` rows. Chart rendering belongs to the consuming application.
 
@@ -42,7 +42,7 @@ TRENDS_REFRESH=1 trends build
 Six commentary datasets are grouped by article in a separate collection.
 `trends articles groups` lists those groups and their fixed default date windows.
 `trends articles build` uses those dates, with optional `--from` and `--to` overrides, and writes
-`dist-commentary/` and leaves the seven maintained trends in `dist-trends/` unchanged.
+`dist-commentary/` and leaves the nine maintained trends in `dist-trends/` unchanged.
 
 | I want to… | Read |
 | --- | --- |
@@ -61,9 +61,9 @@ Six commentary datasets are grouped by article in a separate collection.
   See [partial builds](cli.md#build-one-series-safely).
 - **Checks can write to the cache.** `trends check` computes and validates
   without changing generated output. It can still download missing inputs.
-- **A fresh clone has six trend series' data files.** Bitcoin output is git-ignored
+- **A fresh clone has eight trend series' data files.** Bitcoin output is git-ignored
   under the project's data policy, although it can be listed in the committed
-  index. Run a full build before expecting all seven trend sets of files. The six commentary datasets
+  index. Run a full build before expecting all nine trend sets of files. The six commentary datasets
   are committed separately under `dist-commentary/`.
 - **Data has its own terms.** The code is MIT; each JSON file records the
   licences of its inputs. Keep that metadata with the observations when you

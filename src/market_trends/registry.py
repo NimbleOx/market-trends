@@ -13,16 +13,20 @@ from .schema import Series
 from .trends import (
     btc_in_gold,
     buffett_indicator,
+    capital_share_gdi,
     federal_deficit,
+    labor_share_gdi,
     sp500_in_gold,
 )
 
 BUILDERS: dict[str, Callable[[], Series]] = {
     btc_in_gold.ID: btc_in_gold.build,
     buffett_indicator.ID: buffett_indicator.build,
+    capital_share_gdi.ID: capital_share_gdi.build,
     federal_deficit.ID: federal_deficit.build,
     federal_deficit.GDP_ID: federal_deficit.build_gdp,
     federal_deficit.MONTHLY_ID: federal_deficit.build_monthly,
     federal_deficit.TTM_ID: federal_deficit.build_ttm,
+    labor_share_gdi.ID: labor_share_gdi.build,
     sp500_in_gold.ID: sp500_in_gold.build,
 }

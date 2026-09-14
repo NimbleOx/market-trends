@@ -55,6 +55,12 @@ The output is one ID per line, sorted alphabetically:
 ```text
 btc-in-gold
 buffett-indicator
+capital-share-gdi
+federal-deficit
+federal-deficit-gdp
+federal-deficit-monthly
+federal-deficit-ttm
+labor-share-gdi
 sp500-in-gold
 ```
 
@@ -95,7 +101,7 @@ The CLI computes and validates every selected series before the emitter writes
 any output. A computation or validation failure leaves the output directory
 unchanged, although source data may already have been cached.
 
-A successful full build currently writes 15 files: two per series plus
+A successful full build currently writes 19 files: two per series plus
 `index.json`. The final line reports the number of files written and the output
 directory. See [Output](output.md) for their contents and how to read them.
 

@@ -1,6 +1,6 @@
 # Series
 
-This page documents seven maintained trends and four commentary ratios.
+This page documents nine maintained trends and four commentary ratios.
 Each builder transforms or combines upstream observations and returns a
 `Series` with its source records and display metadata. A build writes
 `series/<id>.json` and `series/<id>.csv` under the output directory.
@@ -9,7 +9,7 @@ See [Output](output.md) for the file format and
 
 The trend registry contains `sp500-in-gold`, `btc-in-gold`,
 `buffett-indicator`, `federal-deficit`, `federal-deficit-gdp`,
-`federal-deficit-monthly`, and `federal-deficit-ttm`.
+`federal-deficit-monthly`, `federal-deficit-ttm`, `labor-share-gdi`, and `capital-share-gdi`.
 The other four ratios belong to commentary article groups
 and are emitted under `dist-commentary/`. The daily Treasury commentary pair
 is documented with its [article group](article-series.md#commentary-groups).
@@ -23,6 +23,8 @@ is documented with its [article group](article-series.md#commentary-groups).
 | [`federal-deficit-gdp`](#federal-deficit-gdp) | Federal budget deficit / fiscal-year GDP | annual (fiscal year) | FY1930 | linear | Trends |
 | [`federal-deficit-monthly`](#federal-deficit-monthly) | Actual monthly federal budget deficit in current dollars | monthly | 1980-10 | linear | Trends |
 | [`federal-deficit-ttm`](#federal-deficit-ttm) | Trailing 12-month federal budget deficit in current dollars | monthly | 1981-09 | linear | Trends |
+| [`labor-share-gdi`](#labor-share-gdi) | Nominal employee compensation / gross domestic income | quarterly | 1947 Q1 | linear | Trends |
+| [`capital-share-gdi`](#capital-share-gdi) | Adjusted corporate profits before tax / gross domestic income | quarterly | 1947 Q1 | linear | Trends |
 | [`corporate-profit-share`](#corporate-profit-share) | After-tax corporate profits / GDP | quarterly | 1947 Q1 | linear | Commentary |
 | [`market-value-per-dollar-of-profit`](#market-value-per-dollar-of-profit) | Nonfinancial corporate equity value / after-tax profits | quarterly | 1947 Q4 | linear | Commentary |
 | [`federal-deficit-share`](#federal-deficit-share) | Federal current expenditures minus receipts / GDP | quarterly | 1947 Q1 | linear | Commentary |
@@ -219,6 +221,67 @@ annual history, even when the period ends in September.
 
 Implementation: [src/market_trends/trends/federal_deficit.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/federal_deficit.py).
 
+## labor-share-gdi
+
+```text
+value = COE / GDI × 100
+```
+
+Labor's share of gross domestic income uses BEA's nominal employee compensation
+[`COE`](https://fred.stlouisfed.org/series/COE), account code `A033RC`, divided by
+nominal [`GDI`](https://fred.stlouisfed.org/series/GDI). Both inputs are quarterly
+flows in billions of current dollars at seasonally adjusted annual rates.
+Their units and annualisation cancel, so no dollar conversion or inflation
+adjustment is needed.
+
+Employee compensation includes wages and salaries plus employer contributions
+for pensions, insurance, and government social insurance. It does not add an
+estimate of labor income earned by the self-employed, whose earnings are
+recorded separately as proprietors' income. This employee-compensation measure
+can therefore differ from labor-share estimates that include self-employment.
+See BEA's [compensation definition](https://www.bea.gov/help/glossary/compensation-employees)
+and [NIPA handbook, chapter 10](https://www.bea.gov/sites/default/files/methodologies/nipa-handbook-all-chapters.pdf).
+
+The builder keeps matching quarters with a positive GDI denominator, beginning
+in 1947 Q1. Dates retain FRED's quarter-start labels: `1947-01-01` denotes all
+of 1947 Q1. The output retains the full history; a consuming chart chooses its
+display window. Stored ratios are rounded to four decimals, with
+`unit: "percent of GDI"`, `precision: 1`, and a linear scale. GDI and GDP have
+different measured values, so substituting GDP changes this series.
+
+Implementation: [src/market_trends/trends/labor_share_gdi.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/labor_share_gdi.py).
+
+## capital-share-gdi
+
+```text
+value = CPROFIT / GDI × 100
+```
+
+Capital's share of gross domestic income uses BEA's corporate profits **before
+tax, with inventory valuation and capital consumption adjustments**,
+[`CPROFIT`](https://fred.stlouisfed.org/series/CPROFIT), account code `A051RC`,
+divided by nominal [`GDI`](https://fred.stlouisfed.org/series/GDI). Both inputs
+are quarterly flows in billions of current dollars at seasonally adjusted
+annual rates, so their units and annualisation cancel.
+
+This is a corporate-profits proxy for capital's share. It does not include all
+capital income or all non-labor income: rental income, net interest, and
+proprietors' income are separate components. It is **not** `100 − labor-share-gdi`,
+and the two measures do not sum to 100. Read the numerator's coverage literally
+when comparing these charts. BEA's [NIPA Table 1.12, via FRED](https://fred.stlouisfed.org/release/tables?eid=15372&rid=53)
+shows these components separately and splits adjusted corporate profits into
+corporate income taxes and after-tax adjusted profits. The commentary series
+[`corporate-profit-share`](#corporate-profit-share) uses a different numerator
+(`CP`, after-tax profits without these adjustments) and denominator (`GDP`).
+
+The builder keeps every matching quarter with positive GDI, starting in 1947 Q1,
+without filling gaps or truncating history. Dates preserve upstream quarter-start
+labels; `1947-01-01` denotes 1947 Q1. Stored ratios are rounded to four decimal
+places and displayed with `precision: 1`, `unit: "percent of GDI"`, and a linear
+scale. Chart consumers choose the display window.
+
+Implementation: [src/market_trends/trends/capital_share_gdi.py](https://github.com/NimbleOx/market-trends/blob/main/src/market_trends/trends/capital_share_gdi.py).
+
 ## corporate-profit-share
 
 ```text
@@ -316,7 +379,7 @@ Implementation: [src/market_trends/commentary/analyzing_the_effects_of_tariffs_o
   only dates present in every required input. It drops missing dates and
   nonpositive denominators rather than filling them. Coverage may have gaps,
   including early equity data with only annual observations.
-- **Aggregation follows the inputs.** Quarterly GDP-based ratios remain quarterly;
+- **Aggregation follows the inputs.** Quarterly GDP- and GDI-based ratios remain quarterly;
   daily Bitcoin readings become monthly averages; monthly imports become
   quarterly annualised values. Historical gold already contains annual values
   repeated into monthly rows upstream, as described above. Annual federal

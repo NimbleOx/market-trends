@@ -14,7 +14,8 @@ terms remain the basis for assessing a particular use.
 The cache column shows where the **current implementation** stores responses.
 It is a routing decision, not an independent verification of rights. External
 references on this page were reviewed on 4 September 2026; the three
-federal budget sources were added on 5 September 2026.
+federal budget sources were added on 5 September 2026. The employee compensation
+and gross domestic income sources were reviewed on 14 September 2026.
 
 | Input | Provider and use | Recorded licence | Cache |
 | --- | --- | --- | --- |
@@ -22,7 +23,10 @@ federal budget sources were added on 5 September 2026.
 | [`datasets/gold-prices`](https://github.com/datasets/gold-prices) | Historical gold and World Bank prices; both gold ratios | `ODC-PDDL-1.0`¹ | `open/` |
 | FRED [`NCBEILQ027S`](https://fred.stlouisfed.org/series/NCBEILQ027S) | Federal Reserve; nonfinancial corporate equities | Public domain (US federal government work) | `open/` |
 | FRED [`GDP`](https://fred.stlouisfed.org/series/GDP) | BEA; gross domestic product | Public domain (US federal government work) | `open/` |
+| FRED [`COE`](https://fred.stlouisfed.org/series/COE) | BEA; nominal employee compensation, numerator of labor's share of GDI | Public domain (US federal government work) | `open/` |
+| FRED [`GDI`](https://fred.stlouisfed.org/series/GDI) | BEA; gross domestic income, denominator of labor's and capital's shares | Public domain (US federal government work) | `open/` |
 | FRED [`CP`](https://fred.stlouisfed.org/series/CP) | BEA; after-tax corporate profits, without IVA and CCAdj | Public domain (US federal government work) | `open/` |
+| FRED [`CPROFIT`](https://fred.stlouisfed.org/series/CPROFIT) | BEA; before-tax corporate profits with IVA and CCAdj, numerator of the capital-share proxy | Public domain (US federal government work) | `open/` |
 | FRED [`FGRECPT`](https://fred.stlouisfed.org/series/FGRECPT) | BEA; federal current receipts | Public domain (US federal government work) | `open/` |
 | FRED [`FGEXPND`](https://fred.stlouisfed.org/series/FGEXPND) | BEA; federal current expenditures | Public domain (US federal government work) | `open/` |
 | FRED [`FYFSD`](https://fred.stlouisfed.org/series/FYFSD) | OMB; federal budget surplus or deficit, fiscal years, millions of current dollars | Public domain (US federal government work) | `open/` |
@@ -50,7 +54,7 @@ not determine which output collection a builder belongs to.
 
 ## FRED data and service access
 
-The ten FRED inputs above carry the “Public Domain: Citation Requested”
+The twelve FRED inputs above carry the “Public Domain: Citation Requested”
 classification on their series pages. FRED hosts data from many providers;
 other series can have different restrictions. Cite both the original provider
 and FRED when using these records, following the suggested citation on each

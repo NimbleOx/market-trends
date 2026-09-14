@@ -35,8 +35,8 @@ trends list
 trends build
 ```
 
-The first build downloads the upstream data, computes and validates the seven
-maintained trends, and writes **15 files**: seven JSON files, seven CSV files, and an index.
+The first build downloads the upstream data, computes and validates the nine
+maintained trends, and writes **19 files**: nine JSON files, nine CSV files, and an index.
 It needs internet access; the current adapters do not require API keys. Later
 builds reuse the local cache until you request a refresh.
 
@@ -47,8 +47,8 @@ output paths and troubleshooting.
 
 ## Read the output
 
-You can inspect the six trend series committed under `dist-trends/` immediately after
-cloning. To generate all seven trend series locally, run the full build above.
+You can inspect the eight trend series committed under `dist-trends/` immediately after
+cloning. To generate all nine trend series locally, run the full build above.
 
 After a successful full build:
 
@@ -58,7 +58,7 @@ dist-trends/
 └── series/
     ├── sp500-in-gold.json         # Metadata, sources, and observations
     ├── sp500-in-gold.csv          # date,value rows
-    └── ...                       # The other six trend series, in both formats
+    └── ...                       # The other eight trend series, in both formats
 ```
 
 For example, run this Python code from the checkout root:
@@ -76,7 +76,7 @@ The [output reference](docs/output.md) documents every field, date conventions,
 timestamps, and CSV loading. Keep each CSV with its JSON: source and licence
 metadata appear only in the JSON.
 
-The repository includes generated files for six trend series and all six
+The repository includes generated files for eight trend series and all six
 commentary datasets. Bitcoin output is git-ignored under the project's data
 policy, so a fresh clone's index can refer
 to missing Bitcoin files until you run a full build.
@@ -92,8 +92,12 @@ to missing Bitcoin files until you run a full build.
 | `federal-deficit-gdp` | US federal budget deficit as a percentage of fiscal-year GDP | Annual (fiscal year) | 1930 |
 | `federal-deficit-monthly` | Actual monthly US federal budget deficit in billions of current dollars | Monthly | 1980 |
 | `federal-deficit-ttm` | Trailing 12-month US federal budget deficit in billions of current dollars | Monthly | 1981 |
+| `labor-share-gdi` | Nominal employee compensation as a percentage of gross domestic income | Quarterly | 1947 |
+| `capital-share-gdi` | Corporate profits before tax, with IVA and CCAdj, as a percentage of gross domestic income | Quarterly | 1947 |
 
 See [Series](docs/series.md) for formulas, units, joins, rounding, and limitations.
+The capital-share series is a corporate-profits proxy, not all non-labor income;
+it and the employee-compensation measure of labor's share do not sum to 100.
 In particular, gold prices before 1960 repeat annual averages in monthly rows;
 the monthly output does not imply monthly gold price detail for that period.
 

@@ -33,6 +33,16 @@ LICENCES: dict[str, tuple[str, str, bool]] = {
         "Public domain (US federal government work)",
         True,
     ),
+    "COE": (
+        "US Bureau of Economic Analysis, National Income: Compensation of Employees, Paid",
+        "Public domain (US federal government work)",
+        True,
+    ),
+    "GDI": (
+        "US Bureau of Economic Analysis, Gross Domestic Income",
+        "Public domain (US federal government work)",
+        True,
+    ),
     "NCBEILQ027S": (
         "Federal Reserve Board, Financial Accounts of the United States (Z.1)",
         "Public domain (US federal government work)",
@@ -40,6 +50,12 @@ LICENCES: dict[str, tuple[str, str, bool]] = {
     ),
     "CP": (
         "US Bureau of Economic Analysis, Corporate Profits After Tax",
+        "Public domain (US federal government work)",
+        True,
+    ),
+    "CPROFIT": (
+        "US Bureau of Economic Analysis, Corporate Profits with Inventory Valuation "
+        "Adjustment (IVA) and Capital Consumption Adjustment (CCAdj)",
         "Public domain (US federal government work)",
         True,
     ),

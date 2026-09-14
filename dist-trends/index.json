@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-05T20:06:16+00:00",
+  "generatedAt": "2026-09-14T22:49:21+00:00",
   "series": [
     {
       "id": "btc-in-gold",
@@ -25,6 +25,18 @@
       "observationCount": 302,
       "file": "series/buffett-indicator.json",
       "csv": "series/buffett-indicator.csv"
+    },
+    {
+      "id": "capital-share-gdi",
+      "title": "Capital’s share of gross domestic income",
+      "unit": "percent of GDI",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1947-01-01",
+      "lastDate": "2026-04-01",
+      "observationCount": 318,
+      "file": "series/capital-share-gdi.json",
+      "csv": "series/capital-share-gdi.csv"
     },
     {
       "id": "federal-deficit",
@@ -75,6 +87,18 @@
       "observationCount": 539,
       "file": "series/federal-deficit-ttm.json",
       "csv": "series/federal-deficit-ttm.csv"
+    },
+    {
+      "id": "labor-share-gdi",
+      "title": "Labor’s share of gross domestic income",
+      "unit": "percent of GDI",
+      "frequency": "quarterly",
+      "scale": "linear",
+      "firstDate": "1947-01-01",
+      "lastDate": "2026-04-01",
+      "observationCount": 318,
+      "file": "series/labor-share-gdi.json",
+      "csv": "series/labor-share-gdi.csv"
     },
     {
       "id": "sp500-in-gold",
